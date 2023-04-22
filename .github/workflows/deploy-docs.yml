@@ -33,7 +33,7 @@ jobs:
         cp utils/.ns3rc ./
         sed -i "s/all_modules/lorawan/" .ns3rc
         sed -i "s/False/True/" .ns3rc
-        ./ns3 configure
+        ./ns3 configure --enable-examples --enable-tests
         ./ns3 docs all
     - name: Pushes to another repository
       uses: cpina/github-action-push-to-another-repository@main
