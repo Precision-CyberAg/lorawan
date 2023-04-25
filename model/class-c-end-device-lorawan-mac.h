@@ -174,8 +174,13 @@ private:
    * The interval between when a packet is done sending and when the second
    * receive window is opened.
    */
-  Time m_receiveDelay2;
+  // Time m_receiveDelay2;
 
+  /**
+   * The interval between when a packet is done sending and when Rx1 window should be opened
+  */
+  Time m_cls2ReceiveDelay1;
+  
   /**
    * The event of the closing the first receive window.
    *

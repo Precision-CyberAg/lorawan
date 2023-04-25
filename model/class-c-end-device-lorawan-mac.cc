@@ -47,9 +47,9 @@ return tid;
 
 ClassCEndDeviceLorawanMac::ClassCEndDeviceLorawanMac () :
   // LoraWAN default
-  m_receiveDelay1 (Seconds (1)),
+  m_cls2ReceiveDelay1 (Seconds (1)),
   // LoraWAN default
-  m_receiveDelay2 (Seconds (2)),
+  // m_receiveDelay2 (Seconds (2)),
   m_rx1DrOffset (0)
 {
   NS_LOG_FUNCTION (this);
@@ -174,7 +174,8 @@ ClassCEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
 
           // If it exists, cancel the second receive window event
           // THIS WILL BE GetReceiveWindow()
-          Simulator::Cancel (m_secondReceiveWindow);
+          // Class C devices open Rx2 even after successful receive window event
+          // Simulator::Cancel (m_secondReceiveWindow);
 
 
           // Parse the MAC commands
@@ -185,6 +186,7 @@ ClassCEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
 
           // Call the trace source
           m_receivedPacket (packet);
+          OpenSecondReceiveWindow();
         }
       else
         {
@@ -232,8 +234,8 @@ ClassCEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
           resetRetransmissionParameters ();
         }
     }
-
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
+  // Class C devices do not sleep
+  // m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
 }
 
 void
@@ -242,7 +244,8 @@ ClassCEndDeviceLorawanMac::FailedReception (Ptr<Packet const> packet)
   NS_LOG_FUNCTION (this << packet);
 
   // Switch to sleep after a failed reception
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
+  // Class C devices do not sleep
+  // m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
 
   if (m_secondReceiveWindow.IsExpired () && m_retxParams.waitingAck)
     {
@@ -269,24 +272,19 @@ ClassCEndDeviceLorawanMac::TxFinished (Ptr<const Packet> packet)
   NS_LOG_FUNCTION_NOARGS ();
 
   // Schedule the opening of the first receive window
-  Simulator::Schedule (m_receiveDelay1,
+  // Opening Rx1 after configured delay
+  Simulator::Schedule (m_cls2ReceiveDelay1,
                        &ClassCEndDeviceLorawanMac::OpenFirstReceiveWindow, this);
 
   // Schedule the opening of the second receive window
-  m_secondReceiveWindow = Simulator::Schedule (m_receiveDelay2,
+  // Rx2 should be opened immediately after uplink
+  m_secondReceiveWindow = Simulator::Schedule (Time(0),
                                                &ClassCEndDeviceLorawanMac::OpenSecondReceiveWindow,
                                                this);
-  // // Schedule the opening of the first receive window
-  // Simulator::Schedule (m_receiveDelay1,
-  //                      &ClassAEndDeviceLorawanMac::OpenFirstReceiveWindow, this);
-  //
-  // // Schedule the opening of the second receive window
-  // m_secondReceiveWindow = Simulator::Schedule (m_receiveDelay2,
-  //                                              &ClassAEndDeviceLorawanMac::OpenSecondReceiveWindow,
-  //                                              this);
 
   // Switch the PHY to sleep
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
+  // Class C devices do not sleep
+  // m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
 }
 
 void
@@ -328,13 +326,17 @@ ClassCEndDeviceLorawanMac::CloseFirstReceiveWindow (void)
       break;
     case EndDeviceLoraPhy::RX:
       // PHY is receiving: let it finish. The Receive method will switch it back to SLEEP.
+      // Rx2 opening is also handled in receive method
       break;
     case EndDeviceLoraPhy::SLEEP:
       // PHY has received, and the MAC's Receive already put the device to sleep
       break;
     case EndDeviceLoraPhy::STANDBY:
       // Turn PHY layer to SLEEP
-      phy->SwitchToSleep ();
+      // class C devices do not sleep
+      // phy->SwitchToSleep ();
+      // Open Rx2 at the end of Rx1
+      OpenSecondReceiveWindow();
       break;
     }
 }
@@ -366,13 +368,14 @@ ClassCEndDeviceLorawanMac::OpenSecondReceiveWindow (void)
                                                                (m_secondReceiveWindowDataRate));
 
   //Calculate the duration of a single symbol for the second receive window DR
-  double tSym = pow (2, GetSfFromDataRate (GetSecondReceiveWindowDataRate ())) / GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate ());
+  // double tSym = pow (2, GetSfFromDataRate (GetSecondReceiveWindowDataRate ())) / GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate ());
 
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  m_closeSecondWindow = Simulator::Schedule (Seconds (m_receiveWindowDurationInSymbols*tSym),
-                                             &ClassCEndDeviceLorawanMac::CloseSecondReceiveWindow, this);
+  // Class C devices do not need schedule a closeReceiveWindow event
+  // m_closeSecondWindow = Simulator::Schedule (Seconds (m_receiveWindowDurationInSymbols*tSym),
+  //                                            &ClassCEndDeviceLorawanMac::CloseSecondReceiveWindow, this);
 
 }
 
