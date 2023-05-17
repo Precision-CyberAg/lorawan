@@ -23,7 +23,7 @@
 #define NETWORK_STATUS_H
 
 #include "ns3/end-device-status.h"
-#include "ns3/class-a-end-device-lorawan-mac.h"
+#include "ns3/end-device-lorawan-mac.h"
 #include "ns3/gateway-status.h"
 #include "ns3/lora-device-address.h"
 #include "ns3/network-scheduler.h"
@@ -53,7 +53,7 @@ public:
   /**
    * Add a device to the ones that are tracked by this NetworkStatus object.
    */
-  void AddNode (Ptr<ClassAEndDeviceLorawanMac> edMac);
+  void AddNode (Ptr<EndDeviceLorawanMac> edMac);
 
   /**
    * Add this gateway to the list of gateways connected to the network.

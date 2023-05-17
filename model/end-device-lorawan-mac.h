@@ -79,6 +79,9 @@ public:
    */
   virtual void postponeTransmission (Time nextTxDelay, Ptr<Packet>);
 
+  virtual uint8_t GetFirstReceiveWindowDataRate(void);
+
+  virtual uint8_t GetSecondReceiveWindowDataRate(void);
 
   ///////////////////////
   // Receiving methods //

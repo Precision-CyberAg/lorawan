@@ -117,7 +117,7 @@ public:
    *
    * \return The Data Rate
    */
-  uint8_t GetFirstReceiveWindowDataRate (void);
+  virtual uint8_t GetFirstReceiveWindowDataRate (void);
 
   /**
    * Set the Data Rate to be used in the second receive window.
@@ -131,7 +131,7 @@ public:
    *
    * \return The Data Rate
    */
-  uint8_t GetSecondReceiveWindowDataRate (void);
+  virtual uint8_t GetSecondReceiveWindowDataRate (void);
 
   /**
    * Set the frequency that will be used for the second receive window.

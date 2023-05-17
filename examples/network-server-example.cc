@@ -43,22 +43,22 @@ int main (int argc, char *argv[])
   LogComponentEnable ("NetworkServerExample", LOG_LEVEL_ALL);
   LogComponentEnable ("NetworkServer", LOG_LEVEL_ALL);
   LogComponentEnable ("GatewayLorawanMac", LOG_LEVEL_ALL);
-  // LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
-  // LogComponentEnable("LorawanMacHeader", LOG_LEVEL_ALL);
-  // LogComponentEnable("MacCommand", LOG_LEVEL_ALL);
-  // LogComponentEnable("GatewayLoraPhy", LOG_LEVEL_ALL);
-  // LogComponentEnable("LoraPhy", LOG_LEVEL_ALL);
-  // LogComponentEnable("LoraChannel", LOG_LEVEL_ALL);
-  // LogComponentEnable("EndDeviceLoraPhy", LOG_LEVEL_ALL);
-  // LogComponentEnable("LogicalLoraChannelHelper", LOG_LEVEL_ALL);
+   LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
+   LogComponentEnable("LorawanMacHeader", LOG_LEVEL_ALL);
+   LogComponentEnable("MacCommand", LOG_LEVEL_ALL);
+   LogComponentEnable("GatewayLoraPhy", LOG_LEVEL_ALL);
+   LogComponentEnable("LoraPhy", LOG_LEVEL_ALL);
+   LogComponentEnable("LoraChannel", LOG_LEVEL_ALL);
+   LogComponentEnable("EndDeviceLoraPhy", LOG_LEVEL_ALL);
+   LogComponentEnable("LogicalLoraChannelHelper", LOG_LEVEL_ALL);
   LogComponentEnable ("EndDeviceLorawanMac", LOG_LEVEL_ALL);
-  LogComponentEnable ("ClassAEndDeviceLorawanMac", LOG_LEVEL_ALL);
-  // LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
-  // LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
-  // LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
-  // LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
-  // LogComponentEnable ("DeviceStatus", LOG_LEVEL_ALL);
-  // LogComponentEnable ("GatewayStatus", LOG_LEVEL_ALL);
+  LogComponentEnable ("ClassCEndDeviceLorawanMac", LOG_LEVEL_ALL);
+   LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
+   LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
+   LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
+   LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
+//   LogComponentEnable ("DeviceStatus", LOG_LEVEL_ALL);
+   LogComponentEnable ("GatewayStatus", LOG_LEVEL_ALL);
   LogComponentEnableAll (LOG_PREFIX_FUNC);
   LogComponentEnableAll (LOG_PREFIX_NODE);
   LogComponentEnableAll (LOG_PREFIX_TIME);
@@ -117,14 +117,14 @@ int main (int argc, char *argv[])
 
   // Create the LoraNetDevices of the end devices
   phyHelper.SetDeviceType (LoraPhyHelper::ED);
-  macHelper.SetDeviceType (LorawanMacHelper::ED_A);
+  macHelper.SetDeviceType (LorawanMacHelper::ED_C);
   macHelper.SetAddressGenerator (addrGen);
   macHelper.SetRegion (LorawanMacHelper::EU);
   helper.Install (phyHelper, macHelper, endDevices);
 
   // Set message type (Default is unconfirmed)
   Ptr<LorawanMac> edMac1 = endDevices.Get (1)->GetDevice (0)->GetObject<LoraNetDevice> ()->GetMac ();
-  Ptr<ClassAEndDeviceLorawanMac> edLorawanMac1 = edMac1->GetObject<ClassAEndDeviceLorawanMac> ();
+  Ptr<EndDeviceLorawanMac> edLorawanMac1 = edMac1->GetObject<EndDeviceLorawanMac> ();
   edLorawanMac1->SetMType (LorawanMacHeader::CONFIRMED_DATA_UP);
 
 

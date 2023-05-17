@@ -930,5 +930,16 @@ EndDeviceLorawanMac::GetTransmissionPower (void)
 {
   return m_txPower;
 }
+
+uint8_t EndDeviceLorawanMac::GetFirstReceiveWindowDataRate(void)
+{
+  return -1;
+}
+
+uint8_t EndDeviceLorawanMac::GetSecondReceiveWindowDataRate(void)
+{
+  return -1;
+}
+
 }
 }
