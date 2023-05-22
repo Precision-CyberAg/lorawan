@@ -43,6 +43,8 @@ int main (int argc, char *argv[])
   LogComponentEnable ("NetworkServerExample", LOG_LEVEL_ALL);
   LogComponentEnable ("NetworkServer", LOG_LEVEL_ALL);
   LogComponentEnable ("GatewayLorawanMac", LOG_LEVEL_ALL);
+  LogComponentEnable("SimpleGatewayLoraPhy",LOG_LEVEL_ALL);
+  LogComponentEnable("SimpleEndDeviceLoraPhy",LOG_LEVEL_ALL);
    LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
    LogComponentEnable("LorawanMacHeader", LOG_LEVEL_ALL);
    LogComponentEnable("MacCommand", LOG_LEVEL_ALL);
@@ -53,6 +55,7 @@ int main (int argc, char *argv[])
    LogComponentEnable("LogicalLoraChannelHelper", LOG_LEVEL_ALL);
   LogComponentEnable ("EndDeviceLorawanMac", LOG_LEVEL_ALL);
   LogComponentEnable ("ClassCEndDeviceLorawanMac", LOG_LEVEL_ALL);
+  LogComponentEnable ("ClassAEndDeviceLorawanMac", LOG_LEVEL_ALL);
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
    LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
    LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
@@ -117,7 +120,7 @@ int main (int argc, char *argv[])
 
   // Create the LoraNetDevices of the end devices
   phyHelper.SetDeviceType (LoraPhyHelper::ED);
-  macHelper.SetDeviceType (LorawanMacHelper::ED_C);
+  macHelper.SetDeviceType (LorawanMacHelper::ED_A);
   macHelper.SetAddressGenerator (addrGen);
   macHelper.SetRegion (LorawanMacHelper::EU);
   helper.Install (phyHelper, macHelper, endDevices);

@@ -20,6 +20,7 @@
  *
  * Modified by: Peggy Anderson <peggy.anderson@usask.ca>
  *              qiuyukang <b612n@qq.com>
+ *              Aditya Jagatha <aditya.jagatha@trojans.dsu.edu>
  */
 
 #include "ns3/class-a-end-device-lorawan-mac.h"

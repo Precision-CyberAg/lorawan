@@ -19,6 +19,7 @@
  *         Martina Capuzzo <capuzzom@dei.unipd.it>
  *
  * Modified by: Peggy Anderson <peggy.anderson@usask.ca>
+ *              Aditya Jagatha <aditya.jagatha@trojans.dsu.edu>
  */
 
 #include "ns3/end-device-lorawan-mac.h"

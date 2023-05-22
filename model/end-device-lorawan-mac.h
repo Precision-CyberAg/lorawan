@@ -19,6 +19,7 @@
  *         Martina Capuzzo <capuzzom@dei.unipd.it>
  *
  * Modified by: Peggy Anderson <peggy.anderson@usask.ca>
+ *              Aditya Jagatha <aditya.jagatha@trojans.dsu.edu>
  */
 
 #ifndef END_DEVICE_LORAWAN_MAC_H

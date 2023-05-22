@@ -20,6 +20,7 @@ set(source_files
     model/periodic-sender.cc
     model/one-shot-sender.cc
     model/forwarder.cc
+    model/beaconing.cc
     model/lorawan-mac-header.cc
     model/lora-frame-header.cc
     model/mac-command.cc
@@ -71,6 +72,7 @@ set(header_files
     model/periodic-sender.h
     model/one-shot-sender.h
     model/forwarder.h
+    model/beaconing.h
     model/lorawan-mac-header.h
     model/lora-frame-header.h
     model/mac-command.h
