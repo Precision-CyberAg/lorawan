@@ -59,7 +59,15 @@ Beaconing::SetLoraNetDevice (Ptr<LoraNetDevice> loraNetDevice)
 void Beaconing::BroadcastBeacon()
 {
   NS_LOG_FUNCTION(this);
-  //ToDO Create a packet and broadcast it to EDs
+
+  Ptr<Packet> packet = Create<Packet>(10);
+  LoraTag tag;
+  packet->RemovePacketTag(tag);
+  tag.SetDataRate(3);
+  tag.SetFrequency(869.525);
+  packet->AddPacketTag(tag);
+  m_loraNetDevice->Send(packet);
+  Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::BroadcastBeacon, this);
 }
 
 void
@@ -67,7 +75,8 @@ Beaconing::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
 
-  // TODO Make sure we are connected to both needed devices
+  Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::BroadcastBeacon, this);
+
 }
 
 void
@@ -75,7 +84,15 @@ Beaconing::StopApplication (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  // TODO Get rid of callbacks
+}
+
+Time Beaconing::GetNextBeaconBroadcastTime(){
+  double currentTime = Simulator::Now().GetSeconds();
+  double k = std::ceil(static_cast<double>(currentTime)/128);
+  double nextBT = (k*128)+0.0015;
+  double secondsTillNextBT = nextBT - currentTime;
+  NS_LOG_DEBUG("Seconds till next beacon broadcast: "<<secondsTillNextBT);
+  return Seconds(secondsTillNextBT);
 }
 
 }

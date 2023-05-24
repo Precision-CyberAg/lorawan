@@ -22,6 +22,7 @@
 #include "ns3/network-module.h"
 #include "ns3/lora-device-address-generator.h"
 #include "ns3/one-shot-sender-helper.h"
+#include "ns3/beaconing-helper.h"
 
 using namespace ns3;
 using namespace lorawan;
@@ -59,6 +60,7 @@ int main (int argc, char *argv[])
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
    LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
    LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
+   LogComponentEnable("Beaconing",LOG_LEVEL_ALL);
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
 //   LogComponentEnable ("DeviceStatus", LOG_LEVEL_ALL);
    LogComponentEnable ("GatewayStatus", LOG_LEVEL_ALL);
@@ -174,6 +176,10 @@ int main (int argc, char *argv[])
   // Install the Forwarder application on the gateways
   ForwarderHelper forwarderHelper;
   forwarderHelper.Install (gateways);
+
+  // Install the beaconing application on gateways
+  BeaconingHelper beaconingHelper;
+  beaconingHelper.Install(gateways);
 
   // Start simulation
   Simulator::Stop (Seconds (800));

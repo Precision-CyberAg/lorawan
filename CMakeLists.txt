@@ -46,6 +46,7 @@ set(source_files
     helper/periodic-sender-helper.cc
     helper/one-shot-sender-helper.cc
     helper/forwarder-helper.cc
+    helper/beaconing-helper.cc
     helper/network-server-helper.cc
     helper/lora-packet-tracker.cc
 )
@@ -98,6 +99,7 @@ set(header_files
     helper/periodic-sender-helper.h
     helper/one-shot-sender-helper.h
     helper/forwarder-helper.h
+    helper/beaconing-helper.h
     helper/network-server-helper.h
     helper/lora-packet-tracker.h
     test/utilities.h

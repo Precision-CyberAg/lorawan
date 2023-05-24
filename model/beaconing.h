@@ -25,6 +25,8 @@
 #include "ns3/lora-net-device.h"
 #include "ns3/nstime.h"
 #include "ns3/attribute.h"
+#include "ns3/lora-tag.h"
+#include "ctime"
 
 namespace ns3 {
 namespace lorawan {
@@ -63,6 +65,8 @@ public:
    * Stop the application
    */
   void StopApplication (void);
+
+  Time GetNextBeaconBroadcastTime();
 
 private:
   Ptr<LoraNetDevice> m_loraNetDevice; //!< Pointer to the node's LoraNetDevice
