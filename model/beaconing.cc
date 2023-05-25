@@ -68,6 +68,7 @@ void Beaconing::BroadcastBeacon()
   packet->AddPacketTag(tag);
   m_loraNetDevice->Send(packet);
   Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::BroadcastBeacon, this);
+
 }
 
 void
@@ -88,7 +89,12 @@ Beaconing::StopApplication (void)
 
 Time Beaconing::GetNextBeaconBroadcastTime(){
   double currentTime = Simulator::Now().GetSeconds();
-  double k = std::ceil(static_cast<double>(currentTime)/128);
+  double k = static_cast<double>(currentTime)/128;
+  if(k == std::ceil(k)){
+      k = k+1;
+  }else {
+      k = std::ceil(k);
+  }
   double nextBT = (k*128)+0.0015;
   double secondsTillNextBT = nextBT - currentTime;
   NS_LOG_DEBUG("Seconds till next beacon broadcast: "<<secondsTillNextBT);
