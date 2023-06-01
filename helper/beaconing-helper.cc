@@ -47,6 +47,12 @@ BeaconingHelper::SetAttribute (std::string name, const AttributeValue &value)
   m_factory.Set (name, value);
 }
 
+void
+BeaconingHelper::SetDeviceType(Beaconing::DeviceType deviceType)
+{
+  m_deviceType = deviceType;
+}
+
 ApplicationContainer
 BeaconingHelper::Install (Ptr<Node> node) const
 {
@@ -72,6 +78,7 @@ BeaconingHelper::InstallPriv (Ptr<Node> node) const
 
   Ptr<Beaconing> app = m_factory.Create<Beaconing> ();
 
+  app->SetDeviceType (m_deviceType);
   app->SetNode (node);
   node->AddApplication (app);
 

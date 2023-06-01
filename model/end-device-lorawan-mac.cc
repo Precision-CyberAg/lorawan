@@ -121,6 +121,10 @@ EndDeviceLorawanMac::EndDeviceLorawanMac ()
       m_address (LoraDeviceAddress (0)),
       // LoraWAN default
       m_receiveWindowDurationInSymbols (8),
+      //LoraWAN default
+      m_beaconReceiveWindowDurationInSymbols(10),
+      m_pingSlotReceiveWindowDurationInSymbols(8),
+      m_pingSlotPeriodicity(4),
       // LoraWAN default
       m_controlDataRate (false),
       m_lastKnownLinkMargin (0),

@@ -19,6 +19,10 @@
  */
 
 #include "ns3/beaconing.h"
+
+#include "class-b-end-device-lorawan-mac.h"
+#include "gateway-lorawan-mac.h"
+
 #include "ns3/log.h"
 
 namespace ns3 {
@@ -56,27 +60,46 @@ Beaconing::SetLoraNetDevice (Ptr<LoraNetDevice> loraNetDevice)
   m_loraNetDevice = loraNetDevice;
 }
 
+void
+Beaconing::SetDeviceType(Beaconing::DeviceType deviceType)
+{
+  m_deviceType = deviceType;
+}
+
+Beaconing::DeviceType Beaconing::GetDeviceType()
+{
+  return m_deviceType;
+}
+
 void Beaconing::BroadcastBeacon()
 {
   NS_LOG_FUNCTION(this);
 
-  Ptr<Packet> packet = Create<Packet>(10);
-  LoraTag tag;
-  packet->RemovePacketTag(tag);
-  tag.SetDataRate(3);
-  tag.SetFrequency(869.525);
-  packet->AddPacketTag(tag);
-  m_loraNetDevice->Send(packet);
+  Ptr<GatewayLorawanMac> gwMac = m_loraNetDevice->GetMac()->GetObject<GatewayLorawanMac>();
+  gwMac->SendBeacon();
   Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::BroadcastBeacon, this);
 
+}
+
+void Beaconing::ScheduleEndDeviceBeaconReception(){
+  NS_LOG_FUNCTION(this);
+  Ptr<ClassBEndDeviceLorawanMac> classBMac = m_loraNetDevice->
+                                             GetMac()->
+                                             GetObject<ClassBEndDeviceLorawanMac>();
+  classBMac->OpenBeaconReceiveWindow();
+  Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::ScheduleEndDeviceBeaconReception, this);
 }
 
 void
 Beaconing::StartApplication (void)
 {
   NS_LOG_FUNCTION (this);
-
-  Simulator::Schedule(Beaconing::GetNextBeaconBroadcastTime(), &Beaconing::BroadcastBeacon, this);
+  Time nextBroadcastTime = GetNextBeaconBroadcastTime();
+  if(m_deviceType==DeviceType::GW){
+      Simulator::Schedule(nextBroadcastTime, &Beaconing::BroadcastBeacon, this);
+  }else if(m_deviceType==DeviceType::ED){
+      Simulator::Schedule(nextBroadcastTime,&Beaconing::ScheduleEndDeviceBeaconReception,this);
+  }
 
 }
 
@@ -100,6 +123,8 @@ Time Beaconing::GetNextBeaconBroadcastTime(){
   NS_LOG_DEBUG("Seconds till next beacon broadcast: "<<secondsTillNextBT);
   return Seconds(secondsTillNextBT);
 }
+
+
 
 }
 }

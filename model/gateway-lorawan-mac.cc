@@ -19,10 +19,13 @@
  */
 
 #include "ns3/gateway-lorawan-mac.h"
-#include "ns3/lorawan-mac-header.h"
-#include "ns3/lora-net-device.h"
-#include "ns3/lora-frame-header.h"
+
+#include "lora-beacon-tag.h"
+
 #include "ns3/log.h"
+#include "ns3/lora-frame-header.h"
+#include "ns3/lora-net-device.h"
+#include "ns3/lorawan-mac-header.h"
 
 namespace ns3 {
 namespace lorawan {
@@ -96,6 +99,74 @@ GatewayLorawanMac::Send (Ptr<Packet> packet)
   // Add the event to the channelHelper to keep track of duty cycle
   m_channelHelper.AddEvent (duration, CreateObject<LogicalLoraChannel>
                               (frequency));
+
+  // Send the packet to the PHY layer to send it on the channel
+  m_phy->Send (packet, params, frequency, sendingPower);
+
+  m_sentNewPacket (packet);
+}
+
+void
+GatewayLorawanMac::SendBeacon(){
+  NS_LOG_FUNCTION (this);
+
+  Ptr<Packet> packet = Create<Packet>(10);
+
+
+  LoraBeaconTag beaconTag;
+  packet->RemovePacketTag(beaconTag);
+  beaconTag.SetTime(Simulator::Now().GetSeconds());
+  packet->AddPacketTag(beaconTag);
+
+  // Get DataRate to send this packet with
+  LoraTag tag;
+  packet->RemovePacketTag (tag);
+  uint8_t dataRate = 3;
+  double frequency = 869.525;
+  tag.SetFrequency(frequency);
+  tag.SetDataRate(dataRate);
+  NS_LOG_DEBUG ("DR: " << unsigned (dataRate));
+  NS_LOG_DEBUG ("SF: " << unsigned (GetSfFromDataRate (dataRate)));
+  NS_LOG_DEBUG ("BW: " << GetBandwidthFromDataRate (dataRate));
+  NS_LOG_DEBUG ("Freq: " << frequency << " MHz");
+  packet->AddPacketTag (tag);
+
+  LorawanMacHeader lorawanMacHeader;
+  lorawanMacHeader.SetMType(LorawanMacHeader::UNCONFIRMED_DATA_DOWN);
+  lorawanMacHeader.SetMajor(1);
+  packet->AddHeader(lorawanMacHeader);
+  NS_LOG_DEBUG(packet);
+  packet->Print(std::cout);
+
+  // Make sure we can transmit this packet
+  if (m_channelHelper.GetWaitingTime(CreateObject<LogicalLoraChannel> (frequency)) > Time(0))
+  {
+      // We cannot send now!
+      NS_LOG_WARN ("Trying to send a packet but Duty Cycle won't allow it. Aborting.");
+      return;
+  }
+
+  LoraTxParameters params;
+  params.sf = GetSfFromDataRate (dataRate);
+  params.headerDisabled = true;
+  params.codingRate = 1;
+  params.bandwidthHz = GetBandwidthFromDataRate (dataRate);
+  params.nPreamble = 10;
+  params.crcEnabled = 0;
+  params.lowDataRateOptimizationEnabled = LoraPhy::GetTSym (params) > MilliSeconds (16) ? true : false;
+
+  // Get the duration
+  Time duration = m_phy->GetOnAirTime (packet, params);
+
+  NS_LOG_DEBUG ("Duration: " << duration.GetSeconds ());
+
+  // Find the channel with the desired frequency
+  double sendingPower = m_channelHelper.GetTxPowerForChannel
+                        (CreateObject<LogicalLoraChannel> (frequency));
+
+  // Add the event to the channelHelper to keep track of duty cycle
+  m_channelHelper.AddEvent (duration, CreateObject<LogicalLoraChannel>
+                           (frequency));
 
   // Send the packet to the PHY layer to send it on the channel
   m_phy->Send (packet, params, frequency, sendingPower);

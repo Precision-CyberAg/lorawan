@@ -28,6 +28,7 @@ set(source_files
     model/lora-device-address.cc
     model/lora-device-address-generator.cc
     model/lora-tag.cc
+    model/lora-beacon-tag.cc
     model/network-server.cc
     model/network-status.cc
     model/network-controller.cc
@@ -82,6 +83,7 @@ set(header_files
     model/lora-device-address.h
     model/lora-device-address-generator.h
     model/lora-tag.h
+    model/lora-beacon-tag.h
     model/network-server.h
     model/network-status.h
     model/network-controller.h

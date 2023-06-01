@@ -408,6 +408,12 @@ protected:
    */
   uint8_t m_receiveWindowDurationInSymbols;
 
+  uint8_t m_beaconReceiveWindowDurationInSymbols;
+
+  uint8_t m_pingSlotReceiveWindowDurationInSymbols;
+
+  uint8_t m_pingSlotPeriodicity;
+
   /**
    * List of the MAC commands that need to be applied to the next UL packet.
    */

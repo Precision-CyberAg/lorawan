@@ -19,9 +19,13 @@
  */
 
 #include "ns3/class-b-end-device-lorawan-mac.h"
-#include "ns3/end-device-lorawan-mac.h"
+
+#include "lora-beacon-tag.h"
+
 #include "ns3/end-device-lora-phy.h"
+#include "ns3/end-device-lorawan-mac.h"
 #include "ns3/log.h"
+
 #include <algorithm>
 
 namespace ns3 {
@@ -163,6 +167,9 @@ ClassBEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
 
       // Determine whether this packet is for us
       bool messageForUs = (m_address == fHdr.GetAddress ());
+      LoraDeviceAddress broadcastAddress;
+      broadcastAddress.SetNwkID(0000000);
+      broadcastAddress.SetNwkAddr(0000000000000000000000000);
 
       if (messageForUs)
         {
@@ -181,6 +188,32 @@ ClassBEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
 
           // Call the trace source
           m_receivedPacket (packet);
+        }
+        else if(fHdr.GetAddress() == broadcastAddress){
+          NS_LOG_INFO ("The message is a broadcast");
+
+          LoraBeaconTag beaconTag;
+          if(packetCopy->PeekPacketTag(beaconTag)){
+              //Found a beacon tag
+              NS_LOG_DEBUG("Received a beacon packet with time: "<<beaconTag.GetTime());
+
+              //Schedule Ping Slots
+              //Calculate Ping Slot Start time
+              double periodicity = 0.96 * std::pow(2,m_pingSlotPeriodicity);
+              NS_LOG_DEBUG("Calculated PingSlot periodicity:"<<periodicity);
+              double maxDelay = 128;
+              m_pingSlotEvents.clear();
+              for(int i = 1 ; i < maxDelay ; i++){
+                    if(i*periodicity>128) {
+                        break ;
+                    }
+                    EventId pingSlotEvent = Simulator::Schedule(Seconds(i*periodicity),&ClassBEndDeviceLorawanMac::OpenPingSlotReceiveWindow,this);
+                    m_pingSlotEvents.push_back(pingSlotEvent);
+              }
+          }else{
+              NS_LOG_DEBUG("Unspecified broadcast");
+          }
+
         }
       else
         {
@@ -283,6 +316,138 @@ ClassBEndDeviceLorawanMac::TxFinished (Ptr<const Packet> packet)
 
   // Switch the PHY to sleep
   m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToSleep ();
+}
+
+void ClassBEndDeviceLorawanMac::OpenPingSlotReceiveWindow()
+{
+  NS_LOG_FUNCTION(this);
+
+  // Set Phy in Standby mode
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
+
+  // Switch to appropriate channel and data rate
+  NS_LOG_INFO ("Using parameters: " << m_pingSlotReceiveWindowFrequency << "Hz, DR"
+                                   << unsigned(m_pingSlotReceiveWindowDataRate));
+
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
+      (m_pingSlotReceiveWindowFrequency);
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
+                                                           (m_pingSlotReceiveWindowDataRate));
+
+  uint8_t sfFromDataRate = GetSfFromDataRate (GetPingSlotReceiveWindowDataRate());
+  NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+
+  double bandwidthFromDataRate = GetBandwidthFromDataRate ( GetPingSlotReceiveWindowDataRate());
+  NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+
+  //Calculate the duration of a single symbol for the second receive window DR
+  double tSym = pow (2, sfFromDataRate) / bandwidthFromDataRate;
+  NS_LOG_DEBUG("Duration for a single symbol in second receive window: "<<tSym);
+
+  // Schedule return to sleep after "at least the time required by the end
+  // device's radio transceiver to effectively detect a downlink preamble"
+  // (LoraWAN specification)
+  const Time& pingSlotReceiveWindowDuration = Seconds((m_pingSlotReceiveWindowDurationInSymbols * tSym)+4.25);
+  NS_LOG_DEBUG("Duration for second receive window: "<<pingSlotReceiveWindowDuration.GetSeconds());
+  m_closeBeaconReceiveWindow = Simulator::Schedule (pingSlotReceiveWindowDuration,
+                                                   &ClassBEndDeviceLorawanMac::ClosePingSlotReceiveWindow, this);
+}
+
+void ClassBEndDeviceLorawanMac::ClosePingSlotReceiveWindow()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  Ptr<EndDeviceLoraPhy> phy = m_phy->GetObject<EndDeviceLoraPhy> ();
+
+  // Check the Phy layer's state:
+  // - RX -> We are receiving a preamble.
+  // - STANDBY -> Nothing was received.
+  // - SLEEP -> We have received a packet.
+  // We should never be in TX or SLEEP mode at this point
+  switch (phy->GetState ())
+  {
+  case EndDeviceLoraPhy::TX:
+        NS_ABORT_MSG ("PHY was in TX mode when attempting to " <<
+                     "close a receive window.");
+        break;
+  case EndDeviceLoraPhy::RX:
+        // PHY is receiving: let it finish. The Receive method will switch it back to SLEEP.
+        break;
+  case EndDeviceLoraPhy::SLEEP:
+        // PHY has received, and the MAC's Receive already put the device to sleep
+        break;
+  case EndDeviceLoraPhy::STANDBY:
+        // Turn PHY layer to SLEEP
+        NS_LOG_DEBUG("Switching PHY to sleep");
+        phy->SwitchToSleep ();
+        break;
+  }
+}
+
+void ClassBEndDeviceLorawanMac::OpenBeaconReceiveWindow()
+{
+  NS_LOG_FUNCTION(this);
+
+  // Set Phy in Standby mode
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
+
+  // Switch to appropriate channel and data rate
+  NS_LOG_INFO ("Using parameters: " << m_beaconReceiveWindowFrequency << "Hz, DR"
+                                   << unsigned(m_beaconReceiveWindowFrequency));
+
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
+      (m_beaconReceiveWindowFrequency);
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
+                                                           (m_beaconReceiveWindowDataRate));
+
+  uint8_t sfFromDataRate = GetSfFromDataRate (GetBeaconReceiveWindowDataRate());
+  NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+
+  double bandwidthFromDataRate = GetBandwidthFromDataRate ( GetBeaconReceiveWindowDataRate());
+  NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+
+  //Calculate the duration of a single symbol for the second receive window DR
+  double tSym = pow (2, sfFromDataRate) / bandwidthFromDataRate;
+  NS_LOG_DEBUG("Duration for a single symbol in second receive window: "<<tSym);
+
+  // Schedule return to sleep after "at least the time required by the end
+  // device's radio transceiver to effectively detect a downlink preamble"
+  // (LoraWAN specification)
+  const Time& beaconReceiveWindowDuration = Seconds((m_beaconReceiveWindowDurationInSymbols * tSym)+4.25);
+  NS_LOG_DEBUG("Duration for second receive window: "<<beaconReceiveWindowDuration.GetSeconds());
+  m_closeBeaconReceiveWindow = Simulator::Schedule (beaconReceiveWindowDuration,
+                                            &ClassBEndDeviceLorawanMac::CloseBeaconReceiveWindow, this);
+}
+
+void ClassBEndDeviceLorawanMac::CloseBeaconReceiveWindow()
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  Ptr<EndDeviceLoraPhy> phy = m_phy->GetObject<EndDeviceLoraPhy> ();
+
+  // Check the Phy layer's state:
+  // - RX -> We are receiving a preamble.
+  // - STANDBY -> Nothing was received.
+  // - SLEEP -> We have received a packet.
+  // We should never be in TX or SLEEP mode at this point
+  switch (phy->GetState ())
+  {
+  case EndDeviceLoraPhy::TX:
+        NS_ABORT_MSG ("PHY was in TX mode when attempting to " <<
+                     "close a receive window.");
+        break;
+  case EndDeviceLoraPhy::RX:
+        // PHY is receiving: let it finish. The Receive method will switch it back to SLEEP.
+        break;
+  case EndDeviceLoraPhy::SLEEP:
+        // PHY has received, and the MAC's Receive already put the device to sleep
+        break;
+  case EndDeviceLoraPhy::STANDBY:
+        // Turn PHY layer to SLEEP
+        NS_LOG_DEBUG("Switching PHY to sleep");
+        phy->SwitchToSleep ();
+        break;
+  }
 }
 
 void
@@ -455,6 +620,7 @@ ClassBEndDeviceLorawanMac::CloseSecondReceiveWindow (void)
     }
 }
 
+
 /////////////////////////
 // Getters and Setters //
 /////////////////////////
@@ -527,6 +693,44 @@ double
 ClassBEndDeviceLorawanMac::GetSecondReceiveWindowFrequency (void)
 {
   return m_secondReceiveWindowFrequency;
+}
+
+void ClassBEndDeviceLorawanMac::SetPingSlotReceiveWindowDataRate(uint8_t dataRate)
+{
+  m_pingSlotReceiveWindowDataRate = dataRate;
+}
+
+uint8_t ClassBEndDeviceLorawanMac::GetPingSlotReceiveWindowDataRate()
+{
+  return m_pingSlotReceiveWindowDataRate;
+}
+
+void ClassBEndDeviceLorawanMac::SetPingSlotReceiveWindowFrequency(double frequencyMHz)
+{
+  m_pingSlotReceiveWindowFrequency = frequencyMHz;
+}
+
+double ClassBEndDeviceLorawanMac::GetPingSlotReceiveWindowFrequency()
+{
+  return m_pingSlotReceiveWindowFrequency;
+}
+
+void ClassBEndDeviceLorawanMac::SetBeaconReceiveWindowFrequency(double frequencyMHz){
+  m_beaconReceiveWindowFrequency = frequencyMHz;
+}
+
+double ClassBEndDeviceLorawanMac::GetBeaconReceiveWindowFrequency()
+{
+  return m_beaconReceiveWindowFrequency;
+}
+
+void ClassBEndDeviceLorawanMac::SetBeaconReceiveWindowDataRate(uint8_t dataRate){
+  m_beaconReceiveWindowDataRate = dataRate;
+}
+
+uint8_t ClassBEndDeviceLorawanMac::GetBeaconReceiveWindowDataRate()
+{
+  return m_beaconReceiveWindowDataRate;
 }
 
 /////////////////////////

@@ -56,8 +56,9 @@ public:
    * \return The next transmission time.
    */
   Time GetWaitingTime (double frequency);
-private:
-protected:
+
+
+  void SendBeacon();
 };
 
 } /* namespace ns3 */

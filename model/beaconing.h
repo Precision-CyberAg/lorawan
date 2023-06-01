@@ -41,6 +41,12 @@ public:
   Beaconing ();
   ~Beaconing ();
 
+  enum DeviceType
+  {
+      GW,
+      ED
+  };
+
   static TypeId GetTypeId (void);
 
   /**
@@ -50,6 +56,9 @@ public:
    */
   void SetLoraNetDevice (Ptr<LoraNetDevice> loraNetDevice);
 
+  void SetDeviceType (DeviceType deviceType);
+
+  DeviceType GetDeviceType();
 
   /**
    * Broadcasts the synchronous beacon defined for class B devices
@@ -68,8 +77,16 @@ public:
 
   Time GetNextBeaconBroadcastTime();
 
+
+private:
+  DeviceType m_deviceType;
+
 private:
   Ptr<LoraNetDevice> m_loraNetDevice; //!< Pointer to the node's LoraNetDevice
+  void ScheduleEndDeviceBeaconReception();
+
+  void ScheduleEndDevicePingSlotReception();
+
 };
 
 } //namespace ns3

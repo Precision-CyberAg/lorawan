@@ -56,9 +56,12 @@ int main (int argc, char *argv[])
    LogComponentEnable("LogicalLoraChannelHelper", LOG_LEVEL_ALL);
   LogComponentEnable ("EndDeviceLorawanMac", LOG_LEVEL_ALL);
   LogComponentEnable ("ClassCEndDeviceLorawanMac", LOG_LEVEL_ALL);
+  LogComponentEnable ("ClassBEndDeviceLorawanMac", LOG_LEVEL_ALL);
   LogComponentEnable ("ClassAEndDeviceLorawanMac", LOG_LEVEL_ALL);
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
    LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
+   LogComponentEnable("NetworkControllerComponent",LOG_LEVEL_ALL);
+   LogComponentEnable("GatewayLorawanMac",LOG_LEVEL_ALL);
    LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
    LogComponentEnable("Beaconing",LOG_LEVEL_ALL);
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
@@ -122,7 +125,7 @@ int main (int argc, char *argv[])
 
   // Create the LoraNetDevices of the end devices
   phyHelper.SetDeviceType (LoraPhyHelper::ED);
-  macHelper.SetDeviceType (LorawanMacHelper::ED_A);
+  macHelper.SetDeviceType (LorawanMacHelper::ED_B);
   macHelper.SetAddressGenerator (addrGen);
   macHelper.SetRegion (LorawanMacHelper::EU);
   helper.Install (phyHelper, macHelper, endDevices);
@@ -179,7 +182,10 @@ int main (int argc, char *argv[])
 
   // Install the beaconing application on gateways
   BeaconingHelper beaconingHelper;
+  beaconingHelper.SetDeviceType(Beaconing::DeviceType::GW);
   beaconingHelper.Install(gateways);
+  beaconingHelper.SetDeviceType(Beaconing::DeviceType::ED);
+  beaconingHelper.Install(endDevices);
 
   // Start simulation
   Simulator::Stop (Seconds (800));

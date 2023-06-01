@@ -18,50 +18,46 @@
  * Author: Aditya Jagatha <aditya.jagatha@trojans.dsu.edu>
  */
 
-#ifndef BEACONING_HELPER_H
-#define BEACONING_HELPER_H
+#ifndef LORA_BEACON_TAG_H
+#define LORA_BEACON_TAG_H
 
-#include "ns3/object-factory.h"
-#include "ns3/address.h"
-#include "ns3/attribute.h"
-#include "ns3/net-device.h"
-#include "ns3/node-container.h"
-#include "ns3/application-container.h"
-#include "ns3/beaconing.h"
-#include <stdint.h>
-#include <string>
+#include "ns3/tag.h"
 
 namespace ns3 {
 namespace lorawan {
 
 /**
- * This class can be used to install Beaconing applications on a set of
- * gateways.
+ * Tag used to save various data about a packet, like its Spreading Factor and
+ * data about interference.
  */
-class BeaconingHelper
+class LoraBeaconTag : public Tag
 {
 public:
-  BeaconingHelper ();
+  static TypeId GetTypeId (void);
+  virtual TypeId GetInstanceTypeId (void) const;
 
-  ~BeaconingHelper ();
+  /**
+   * Create a LoraTag with a given spreading factor and collision.
+   *
+   * \param sf The Spreading Factor.
+   * \param destroyedBy The SF this tag's packet was destroyed by.
+   */
+  LoraBeaconTag (uint32_t m_time = 0);
 
-  void SetAttribute (std::string name, const AttributeValue &value);
+  virtual ~LoraBeaconTag ();
 
-  void SetDeviceType (Beaconing::DeviceType deviceType);
+  virtual void Serialize (TagBuffer i) const;
+  virtual void Deserialize (TagBuffer i);
+  virtual uint32_t GetSerializedSize () const;
+  virtual void Print (std::ostream &os) const;
 
-  ApplicationContainer Install (NodeContainer c) const;
+  uint32_t GetTime();
 
-  ApplicationContainer Install (Ptr<Node> node) const;
+  void SetTime(uint32_t m_time);
 
 private:
-  Ptr<Application> InstallPriv (Ptr<Node> node) const;
-
-  ObjectFactory m_factory;
-
-  Beaconing::DeviceType m_deviceType;
+  uint32_t m_time; //!< Time in seconds
 };
-
 } // namespace ns3
-
 }
-#endif /* BEACONING_HELPER_H */
+#endif

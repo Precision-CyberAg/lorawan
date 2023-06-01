@@ -257,6 +257,18 @@ LorawanMacHelper::ConfigureForAlohaRegion (Ptr<ClassBEndDeviceLorawanMac> edMac)
   //////////////////////////////////////
   edMac->SetSecondReceiveWindowDataRate (0);
   edMac->SetSecondReceiveWindowFrequency (869.525);
+
+  //////////////////////////////////////
+  // PingSlot receive window parameters //
+  //////////////////////////////////////
+  edMac->SetPingSlotReceiveWindowDataRate(3);
+  edMac->SetPingSlotReceiveWindowFrequency(869.525);
+
+  //////////////////////////////////////
+  // Beacon receive window parameters //
+  //////////////////////////////////////
+  edMac->SetBeaconReceiveWindowDataRate(3);
+  edMac->SetBeaconReceiveWindowFrequency(869.525);
 }
 
 void
@@ -428,6 +440,18 @@ LorawanMacHelper::ConfigureForEuRegion (Ptr<ClassBEndDeviceLorawanMac> edMac) co
   //////////////////////////////////////
   edMac->SetSecondReceiveWindowDataRate (0);
   edMac->SetSecondReceiveWindowFrequency (869.525);
+
+  //////////////////////////////////////
+  // PingSlot receive window parameters //
+  //////////////////////////////////////
+  edMac->SetPingSlotReceiveWindowDataRate(3);
+  edMac->SetPingSlotReceiveWindowFrequency(869.525);
+
+  //////////////////////////////////////
+  // Beacon receive window parameters //
+  //////////////////////////////////////
+  edMac->SetBeaconReceiveWindowDataRate(3);
+  edMac->SetBeaconReceiveWindowFrequency(869.525);
 }
 
 void
@@ -616,6 +640,18 @@ LorawanMacHelper::ConfigureForSingleChannelRegion (Ptr<ClassBEndDeviceLorawanMac
   //////////////////////////////////////
   edMac->SetSecondReceiveWindowDataRate (0);
   edMac->SetSecondReceiveWindowFrequency (869.525);
+
+  //////////////////////////////////////
+  // PingSlot receive window parameters //
+  //////////////////////////////////////
+  edMac->SetPingSlotReceiveWindowDataRate(3);
+  edMac->SetPingSlotReceiveWindowFrequency(869.525);
+
+  //////////////////////////////////////
+  // Beacon receive window parameters //
+  //////////////////////////////////////
+  edMac->SetBeaconReceiveWindowDataRate(3);
+  edMac->SetBeaconReceiveWindowFrequency(869.525);
 }
 
 void

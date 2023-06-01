@@ -76,6 +76,14 @@ public:
    */
   virtual void TxFinished (Ptr<const Packet> packet);
 
+  void OpenPingSlotReceiveWindow();
+
+  void ClosePingSlotReceiveWindow();
+
+  void OpenBeaconReceiveWindow();
+
+  void CloseBeaconReceiveWindow();
+
   /**
    * Perform operations needed to open the first receive window.
    */
@@ -108,6 +116,7 @@ public:
    * irrespective of the class (e.g., because of duty cycle limitations).
    */
   virtual Time GetNextClassTransmissionDelay (Time waitingTime);
+
 
   /**
    * Get the Data Rate that will be used in the first receive window.
@@ -143,6 +152,22 @@ public:
    * @return The frequency, in MHz
    */
   double GetSecondReceiveWindowFrequency (void);
+
+  void SetPingSlotReceiveWindowFrequency(double frequencyMHz);
+
+  double GetPingSlotReceiveWindowFrequency();
+
+  void SetPingSlotReceiveWindowDataRate(uint8_t dataRate);
+
+  uint8_t GetPingSlotReceiveWindowDataRate();
+
+  void SetBeaconReceiveWindowFrequency(double frequencyMhz);
+
+  double GetBeaconReceiveWindowFrequency();
+
+  void SetBeaconReceiveWindowDataRate(uint8_t dataRate);
+
+  uint8_t GetBeaconReceiveWindowDataRate();
 
   /////////////////////////
   // MAC command methods //
@@ -195,20 +220,36 @@ private:
    */
   EventId m_secondReceiveWindow;
 
+  EventId m_closeBeaconReceiveWindow;
+
+  EventId m_beaconReceiveWindow;
+
+  std::vector<EventId> m_pingSlotEvents;
+
   /**
    * The frequency to listen on for the second receive window.
    */
   double m_secondReceiveWindowFrequency;
+
 
   /**
    * The Data Rate to listen for during the second downlink transmission.
    */
   uint8_t m_secondReceiveWindowDataRate;
 
+  double m_pingSlotReceiveWindowFrequency;
+
+  uint8_t m_pingSlotReceiveWindowDataRate;
+
+  double m_beaconReceiveWindowFrequency;
+
+  uint8_t m_beaconReceiveWindowDataRate;
+
   /**
    * The RX1DROffset parameter value
    */
   uint8_t m_rx1DrOffset;
+
 
 }; /* ClassBEndDeviceLorawanMac */
 } /* namespace lorawan */
