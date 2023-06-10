@@ -69,7 +69,18 @@ LoraPhy::GetTypeId (void)
                      "could not be correctly received because"
                      "its received power is below the sensitivity of the receiver",
                      MakeTraceSourceAccessor (&LoraPhy::m_underSensitivity),
-                     "ns3::Packet::TracedCallback");
+                     "ns3::Packet::TracedCallback")
+    .AddTraceSource ("SnifferRx",
+                     "Trace source simulating a device "
+                     "sniffing all received frames",
+                     MakeTraceSourceAccessor (&LoraPhy::m_phySniffRxTrace),
+                     "ns3::LoraPhy::SnifferRxTracedCallback")
+    .AddTraceSource ("SnifferTx",
+                     "Trace source simulating a device "
+                     "sniffing all frames being transmitted",
+                     MakeTraceSourceAccessor (&LoraPhy::m_phySniffTxTrace),
+                     "ns3::LoraPhy::SnifferRxTracedCallback")
+  ;
   return tid;
 }
 
@@ -204,6 +215,12 @@ LoraPhy::GetOnAirTime (Ptr<Packet> packet, LoraTxParameters txParams)
 
   // Compute and return the total packet on-air time
   return Seconds (tPreamble + tPayload);
+}
+
+double LoraPhy::RxPowerToSNR (double transmissionPower)
+{
+  //The following conversion ignores interfering packets
+  return transmissionPower + 174 - 10 * log10 (B) - NF;
 }
 
 std::ostream &operator << (std::ostream &os, const LoraTxParameters &params)

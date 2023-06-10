@@ -2,9 +2,6 @@
 
 
 def build(bld):
-    obj = bld.create_ns3_program('end-device-reception-example', ['lorawan'])
-    obj.source = 'end-device-reception-example.cc'
-
     obj = bld.create_ns3_program('simple-network-example', ['lorawan'])
     obj.source = 'simple-network-example.cc'
 
@@ -28,3 +25,6 @@ def build(bld):
 
     obj = bld.create_ns3_program('frame-counter-update', ['lorawan'])
     obj.source = 'frame-counter-update.cc'
+
+    obj = bld.create_ns3_program('pcap-example', ['lorawan'])
+    obj.source = 'pcap-example.cc'

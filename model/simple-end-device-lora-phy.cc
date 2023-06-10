@@ -98,6 +98,12 @@ SimpleEndDeviceLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams,
                            packet);
     }
 
+  // Fire the sniffer trace source
+  if (!m_phySniffTxTrace.IsEmpty ())
+    {
+      Simulator::Schedule (duration, &SimpleEndDeviceLoraPhy::m_phySniffTxTrace, this,
+                           packet);
+    }
 
   // Call the trace source
   if (m_device)
@@ -304,6 +310,19 @@ SimpleEndDeviceLoraPhy::EndReceive (Ptr<Packet> packet,
       // If there is one, perform the callback to inform the upper layer
       if (!m_rxOkCallback.IsNull ())
         {
+          // Set the receive power, frequency and SNR of this packet in the LoraTag:
+          // here this information is useful for filling the packet sniffing header.
+          LoraTag tag;
+          packet->RemovePacketTag (tag);
+          tag.SetReceivePower (event->GetRxPowerdBm ());
+          tag.SetFrequency (event->GetFrequency ());
+          tag.SetSnr (RxPowerToSNR (event->GetRxPowerdBm ()));
+          packet->AddPacketTag (tag);
+
+          // Fire the sniffer trace source
+          if (!m_phySniffRxTrace.IsEmpty ()) m_phySniffRxTrace (packet);
+
+          // Forward to upper layer
           m_rxOkCallback (packet);
         }
 

@@ -20,6 +20,7 @@
 
 #include "ns3/lora-helper.h"
 #include "ns3/log.h"
+#include "ns3/loratap-header.h"
 
 #include <fstream>
 
@@ -342,6 +343,71 @@ LoraHelper::DoPrintSimulationTime (Time interval)
   std::cout << "Real time from last call: " << std::time (0) - m_oldtime << " seconds" << std::endl;
   m_oldtime = std::time (0);
   Simulator::Schedule (interval, &LoraHelper::DoPrintSimulationTime, this, interval);
+}
+
+void
+LoraHelper::EnablePcapInternal (std::string prefix, Ptr<NetDevice> nd, bool promiscuous, bool explicitFilename)
+{
+  NS_LOG_FUNCTION (this << prefix << nd << promiscuous << explicitFilename);
+
+  //
+  // All of the Pcap enable functions vector through here including the ones
+  // that are wandering through all of devices on perhaps all of the nodes in
+  // the system.  We can only deal with devices of type LoraNetDevice.
+  //
+  Ptr<LoraNetDevice> device = nd->GetObject<LoraNetDevice> ();
+  if (device == 0)
+    {
+      NS_LOG_INFO ("LoraHelper::EnablePcapInternal(): Device " << device << " not of type ns3::LoraNetDevice");
+      return;
+    }
+
+  auto phy = device->GetPhy ();
+  NS_ABORT_MSG_IF (phy == 0, "LoRaHelper::EnablePcapInternal(): Phy layer in LoraNetDevice must be set");
+
+  PcapHelper pcapHelper;
+
+  std::string filename;
+  if (explicitFilename)
+    {
+      filename = prefix;
+    }
+  else
+    {
+      filename = pcapHelper.GetFilenameFromDevice (prefix, device);
+    }
+
+  auto file = pcapHelper.CreateFile (filename, std::ios::out, PcapHelper::DLT_LORATAP);
+  phy->TraceConnectWithoutContext ("SnifferRx", MakeBoundCallback (&LoraHelper::PcapSniffRxEvent, file));
+  phy->TraceConnectWithoutContext ("SnifferTx", MakeBoundCallback (&LoraHelper::PcapSniffTxEvent, file));
+}
+
+void
+LoraHelper::PcapSniffRxEvent (
+  Ptr<PcapFileWrapper>  file,
+  Ptr<const Packet>     packet)
+{
+  Ptr<Packet> p = packet->Copy ();
+  LoraTag tag;
+  p -> RemovePacketTag (tag);
+  LoratapHeader header;
+  header.Fill (tag);
+  p->AddHeader (header);
+  file->Write (Simulator::Now (), p);
+}
+
+void
+LoraHelper::PcapSniffTxEvent (
+  Ptr<PcapFileWrapper>  file,
+  Ptr<const Packet>     packet)
+{
+  Ptr<Packet> p = packet->Copy ();
+  LoraTag tag;
+  p -> RemovePacketTag (tag);
+  LoratapHeader header;
+  header.Fill (tag);
+  p->AddHeader (header);
+  file->Write (Simulator::Now (), p);
 }
 
 }

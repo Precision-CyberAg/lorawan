@@ -1,11 +1,4 @@
 build_lib_example(
-        NAME end-device-reception-example
-        SOURCE_FILES end-device-reception-example.cc
-        LIBRARIES_TO_LINK
-        ${libcore} ${liblorawan}
-)
-
-build_lib_example(
   NAME simple-network-example
   SOURCE_FILES simple-network-example.cc
   LIBRARIES_TO_LINK
@@ -63,6 +56,14 @@ build_lib_example(
 build_lib_example(
   NAME frame-counter-update
   SOURCE_FILES frame-counter-update.cc
+  LIBRARIES_TO_LINK
+    ${libcore}
+    ${liblorawan}
+)
+
+build_lib_example(
+  NAME pcap-example
+  SOURCE_FILES pcap-example.cc
   LIBRARIES_TO_LINK
     ${libcore}
     ${liblorawan}

@@ -101,6 +101,13 @@ SimpleGatewayLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams, doubl
 
   Simulator::Schedule (duration, &SimpleGatewayLoraPhy::TxFinished, this, packet);
 
+  // Fire the sniffer trace source
+  if (!m_phySniffTxTrace.IsEmpty ())
+    {
+      Simulator::Schedule (duration, &SimpleGatewayLoraPhy::m_phySniffTxTrace, this,
+                           packet);
+    }
+
   m_isTransmitting = true;
 
   // Fire the trace source
@@ -276,14 +283,20 @@ SimpleGatewayLoraPhy::EndReceive (Ptr<Packet> packet, Ptr<LoraInterferenceHelper
 
           // Set the receive power and frequency of this packet in the LoraTag: this
           // information can be useful for upper layers trying to control link
-          // quality.
+          // quality and to fill the packet sniffing header.
           LoraTag tag;
           packet->RemovePacketTag (tag);
           tag.SetReceivePower (event->GetRxPowerdBm ());
           tag.SetFrequency (event->GetFrequency ());
+          tag.SetSnr (RxPowerToSNR (event->GetRxPowerdBm ()));
           packet->AddPacketTag (tag);
 
+          // Fire the sniffer trace source
+          if (!m_phySniffRxTrace.IsEmpty ()) m_phySniffRxTrace (packet);
+
+          // Forward to upper layer
           m_rxOkCallback (packet);
+
         }
     }
 
