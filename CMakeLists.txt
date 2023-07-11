@@ -22,6 +22,7 @@ set(source_files
     model/one-shot-sender.cc
     model/forwarder.cc
     model/beaconing.cc
+    model/visualizer.cc
     model/lorawan-mac-header.cc
     model/lora-frame-header.cc
     model/mac-command.cc
@@ -50,6 +51,7 @@ set(source_files
     helper/one-shot-sender-helper.cc
     helper/forwarder-helper.cc
     helper/beaconing-helper.cc
+    helper/visualizer-helper.cc
     helper/network-server-helper.cc
     helper/lora-packet-tracker.cc
 )
@@ -78,6 +80,7 @@ set(header_files
     model/one-shot-sender.h
     model/forwarder.h
     model/beaconing.h
+    model/visualizer.h
     model/lorawan-mac-header.h
     model/lora-frame-header.h
     model/mac-command.h
@@ -106,6 +109,7 @@ set(header_files
     helper/one-shot-sender-helper.h
     helper/forwarder-helper.h
     helper/beaconing-helper.h
+    helper/visualizer-helper.h
     helper/network-server-helper.h
     helper/lora-packet-tracker.h
     test/utilities.h

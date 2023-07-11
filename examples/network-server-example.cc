@@ -4,25 +4,29 @@
  * Two end devices are already configured to send unconfirmed and confirmed messages respectively.
  */
 
-#include "ns3/point-to-point-module.h"
-#include "ns3/forwarder-helper.h"
-#include "ns3/network-server-helper.h"
-#include "ns3/lora-channel.h"
-#include "ns3/mobility-helper.h"
-#include "ns3/lora-phy-helper.h"
-#include "ns3/lorawan-mac-helper.h"
-#include "ns3/lora-helper.h"
-#include "ns3/gateway-lora-phy.h"
-#include "ns3/periodic-sender.h"
-#include "ns3/periodic-sender-helper.h"
-#include "ns3/log.h"
-#include "ns3/string.h"
+#include "../../mobility/model/rectangle.h"
+#include "../helper/visualizer-helper.h"
+
+#include "ns3/beaconing-helper.h"
 #include "ns3/command-line.h"
 #include "ns3/core-module.h"
-#include "ns3/network-module.h"
+#include "ns3/forwarder-helper.h"
+#include "ns3/gateway-lora-phy.h"
+#include "ns3/log.h"
+#include "ns3/lora-channel.h"
 #include "ns3/lora-device-address-generator.h"
+#include "ns3/lora-helper.h"
+#include "ns3/lora-phy-helper.h"
+#include "ns3/lorawan-mac-helper.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/network-module.h"
+#include "ns3/network-server-helper.h"
 #include "ns3/one-shot-sender-helper.h"
-#include "ns3/beaconing-helper.h"
+#include "ns3/periodic-sender-helper.h"
+#include "ns3/periodic-sender.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/string.h"
+#include "ns3/visualizer.h"
 
 using namespace ns3;
 using namespace lorawan;
@@ -67,6 +71,8 @@ int main (int argc, char *argv[])
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
 //   LogComponentEnable ("DeviceStatus", LOG_LEVEL_ALL);
    LogComponentEnable ("GatewayStatus", LOG_LEVEL_ALL);
+   LogComponentEnable("LoraChannel", LOG_LEVEL_ALL);
+   LogComponentEnable ("Visualizer", LOG_LEVEL_ALL);
   LogComponentEnableAll (LOG_PREFIX_FUNC);
   LogComponentEnableAll (LOG_PREFIX_NODE);
   LogComponentEnableAll (LOG_PREFIX_TIME);
@@ -88,10 +94,17 @@ int main (int argc, char *argv[])
   // End Device mobility
   MobilityHelper mobilityEd, mobilityGw;
   Ptr<ListPositionAllocator> positionAllocEd = CreateObject<ListPositionAllocator> ();
-  positionAllocEd->Add (Vector (6000.0, 0.0, 0.0));
-  positionAllocEd->Add (Vector (0.0, 100.0, 0.0));
-  mobilityEd.SetPositionAllocator (positionAllocEd);
-  mobilityEd.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+//  positionAllocEd->Add (Vector (6000.0, 0.0, 0.0));
+//  positionAllocEd->Add (Vector (0.0, 100.0, 0.0));
+//  mobilityEd.SetPositionAllocator (positionAllocEd);
+//  mobilityEd.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+
+  mobilityEd.SetPositionAllocator("ns3::RandomRectanglePositionAllocator",
+                                "X", StringValue("ns3::UniformRandomVariable[Min=0|Max=3500]"),
+                                "Y", StringValue("ns3::UniformRandomVariable[Min=0|Max=3500]"));
+  mobilityEd.SetMobilityModel("ns3::RandomWalk2dMobilityModel",
+                            "Bounds", RectangleValue(Rectangle(0, 3500, 0, 3500)));
+
 
   // Gateway mobility
   Ptr<ListPositionAllocator> positionAllocGw = CreateObject<ListPositionAllocator> ();
@@ -125,7 +138,7 @@ int main (int argc, char *argv[])
 
   // Create the LoraNetDevices of the end devices
   phyHelper.SetDeviceType (LoraPhyHelper::ED);
-  macHelper.SetDeviceType (LorawanMacHelper::ED_B);
+  macHelper.SetDeviceType (LorawanMacHelper::ED_A);
   macHelper.SetAddressGenerator (addrGen);
   macHelper.SetRegion (LorawanMacHelper::EU);
   helper.Install (phyHelper, macHelper, endDevices);
@@ -184,8 +197,16 @@ int main (int argc, char *argv[])
   BeaconingHelper beaconingHelper;
   beaconingHelper.SetDeviceType(Beaconing::DeviceType::GW);
   beaconingHelper.Install(gateways);
-  beaconingHelper.SetDeviceType(Beaconing::DeviceType::ED);
-  beaconingHelper.Install(endDevices);
+//  beaconingHelper.SetDeviceType(Beaconing::DeviceType::ED);
+//  beaconingHelper.Install(endDevices);
+
+  //Install the visualizer application on end-devices
+  VisualizerHelper visHelper;
+  visHelper.SetSimulationTime(Seconds(800));
+  visHelper.Install(endDevices, Visualizer::DeviceType::ED);
+  visHelper.Install(gateways, Visualizer::DeviceType::GW);
+  visHelper.Install(networkServers, Visualizer::DeviceType::NS);
+
 
   // Start simulation
   Simulator::Stop (Seconds (800));

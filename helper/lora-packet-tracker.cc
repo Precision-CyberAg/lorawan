@@ -110,7 +110,7 @@ LoraPacketTracker::MacGwReceptionCallback (Ptr<Packet const> packet)
 /////////////////
 
 void
-LoraPacketTracker::TransmissionCallback (Ptr<Packet const> packet, uint32_t edId)
+LoraPacketTracker::TransmissionCallback (Ptr<Packet const> packet, uint32_t edId, double duration)
 {
   if (IsUplink (packet))
     {

@@ -80,7 +80,7 @@ public:
   // PHY layer callbacks //
   /////////////////////////
   // Packet transmission callback
-  void TransmissionCallback (Ptr<Packet const> packet, uint32_t systemId);
+  void TransmissionCallback (Ptr<Packet const> packet, uint32_t systemId, double duration);
   // Packet outcome traces
   void PacketReceptionCallback (Ptr<Packet const> packet, uint32_t systemId);
   void InterferenceCallback (Ptr<Packet const> packet, uint32_t systemId);

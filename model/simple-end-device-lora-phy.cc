@@ -108,11 +108,11 @@ SimpleEndDeviceLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams,
   // Call the trace source
   if (m_device)
     {
-      m_startSending (packet, m_device->GetNode ()->GetId ());
+      m_startSending (packet, m_device->GetNode ()->GetId (), duration.GetSeconds());
     }
   else
     {
-      m_startSending (packet, 0);
+      m_startSending (packet, 0, 0);
     }
 }
 

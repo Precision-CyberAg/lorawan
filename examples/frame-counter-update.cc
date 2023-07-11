@@ -42,7 +42,7 @@ int nGateways = 1;
 double simulationTime = 3600;
 
 void
-OnPhySentPacket (Ptr<const Packet> packet, uint32_t index)
+OnPhySentPacket (Ptr<const Packet> packet, uint32_t index, double duration)
 {
   Ptr<Packet> packetCopy = packet->Copy();
 

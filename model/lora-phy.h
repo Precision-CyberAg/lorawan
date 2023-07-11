@@ -290,7 +290,7 @@ protected:
    *
    * \see class CallBackTraceSource
    */
-  TracedCallback<Ptr<const Packet>, uint32_t> m_startSending;
+  TracedCallback<Ptr<const Packet>, uint32_t, double> m_startSending;
 
   /**
    * The trace source fired when a packet begins the reception process from the

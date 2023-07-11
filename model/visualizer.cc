@@ -1,0 +1,312 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+ * Copyright (c) 2023 Dakota State University
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation;
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * Author: Aditya Jagatha <aditya.jagatha@trojans.dsu.edu>
+ */
+
+#include "ns3/visualizer.h"
+
+#include "end-device-lorawan-mac.h"
+#include "gateway-lorawan-mac.h"
+#include "lora-frame-header.h"
+#include "lorawan-mac-header.h"
+
+#include "ns3/log.h"
+#include "ns3/packet.h"
+
+namespace ns3
+{
+namespace lorawan
+{
+
+NS_LOG_COMPONENT_DEFINE("Visualizer");
+
+NS_OBJECT_ENSURE_REGISTERED(Visualizer);
+
+TypeId
+Visualizer::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::Visualizer")
+                            .SetParent<Application>()
+                            .AddConstructor<Visualizer>()
+                            .SetGroupName("lorawan");
+    return tid;
+}
+
+Visualizer::Visualizer()
+{
+    NS_LOG_FUNCTION_NOARGS();
+}
+
+Visualizer::~Visualizer()
+{
+    NS_LOG_FUNCTION_NOARGS();
+}
+
+void
+Visualizer::SetNetDevice(Ptr<NetDevice> netDevice)
+{
+    NS_LOG_FUNCTION(this << netDevice);
+
+    m_netDevice = netDevice;
+}
+
+void Visualizer::SetMobilityModel(Ptr<ns3::MobilityModel> mobilityModel)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    m_mobilityModel = mobilityModel;
+}
+
+void
+Visualizer::SetDeviceType(ns3::lorawan::Visualizer::DeviceType deviceType)
+{
+    m_deviceType = deviceType;
+}
+
+void
+Visualizer::StartApplication(void)
+{
+    NS_LOG_FUNCTION(this);
+    if (Ptr<LoraNetDevice> loraNetDevice = m_netDevice->GetObject<LoraNetDevice>())
+    {
+        Ptr<LoraPhy> loraPhy = loraNetDevice->GetPhy();
+        Ptr<LorawanMac> lorawanMac = loraNetDevice->GetMac();
+        Ptr<LoraChannel> loraChannel = loraNetDevice->GetChannel()->GetObject<LoraChannel>();
+
+        loraPhy->TraceConnectWithoutContext("StartSending",
+                                            MakeCallback(&Visualizer::PhyTraceStartSending, this));
+
+        loraPhy->TraceConnectWithoutContext("PhyRxBegin",
+                                            MakeCallback(&Visualizer::PhyTracePhyRxBegin, this));
+
+        loraPhy->TraceConnectWithoutContext(
+            "ReceivedPacket",
+            MakeCallback(&Visualizer::PhyTraceReceivedPacket, this));
+
+
+        if (Ptr<EndDeviceLoraPhy> endDeviceLoraPhy = loraPhy->GetObject<EndDeviceLoraPhy>())
+        {
+            endDeviceLoraPhy->TraceConnectWithoutContext("EndDeviceState", MakeCallback(&Visualizer::PhyEndDeviceState, this));
+        }
+        else
+        {
+            // Handle for gws
+        }
+
+        m_mobilityModel->TraceConnectWithoutContext("CourseChange", MakeCallback(&Visualizer::MobilityTraceCourseChange, this));
+        MobilityTraceCourseChange(m_mobilityModel);
+    }
+    else
+    {
+        NS_LOG_DEBUG("Unspecified net device!");
+    }
+}
+
+void
+Visualizer::StopApplication(void)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    NS_LOG_DEBUG("Hello!");
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToFile();
+}
+
+void
+Visualizer::PhyTraceStartSending(Ptr<const ns3::Packet> packet, uint32_t t, double duration)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    Ptr<Packet> packet2 = packet->Copy();
+    LoraTag loraTag;
+    packet->PeekPacketTag(loraTag);
+
+    LorawanMacHeader macHeader;
+    packet2->RemoveHeader(macHeader);
+
+    LoraFrameHeader frameHeader;
+    packet2->RemoveHeader(frameHeader);
+
+    std::string devAddress;
+    if(m_deviceType==ED){
+        devAddress = m_netDevice->GetObject<LoraNetDevice>()
+                         ->GetMac()
+                         ->GetObject<EndDeviceLorawanMac>()
+                         ->GetDeviceAddress()
+                         .Print();
+    }else if(m_deviceType==GW){
+    }
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "PHYTraceStartSending"},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"DeviceAddress", devAddress},
+                                   {"FrameHeaderAddress", frameHeader.GetAddress().Print()},
+                                   {"PacketUid", std::to_string(packet->GetUid())},
+                                   {"Duration", std::to_string(duration)}
+                                  },
+                                  Simulator::Now());
+}
+
+void
+Visualizer::PhyTracePhyRxBegin(Ptr<const ns3::Packet> packet)
+{
+    NS_LOG_FUNCTION_NOARGS();
+}
+
+void
+Visualizer::PhyTraceReceivedPacket(Ptr<const ns3::Packet> packet, uint32_t t)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    Ptr<Packet> packet2 = packet->Copy();
+    LoraTag loraTag;
+    packet->PeekPacketTag(loraTag);
+
+    LorawanMacHeader macHeader;
+    packet2->RemoveHeader(macHeader);
+
+    LoraFrameHeader frameHeader;
+    packet2->RemoveHeader(frameHeader);
+
+    std::string devAddress;
+    if(m_deviceType==ED){
+        devAddress = m_netDevice->GetObject<LoraNetDevice>()
+            ->GetMac()
+            ->GetObject<EndDeviceLorawanMac>()
+            ->GetDeviceAddress()
+            .Print();
+    }else if(m_deviceType==GW){
+    }
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "PHYTraceReceivedPacket"},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"DeviceAddress", devAddress},
+                                   {"FrameHeaderAddress", frameHeader.GetAddress().Print()},
+                                   {"PacketUid", std::to_string(packet->GetUid())}
+                                  },
+                                  Simulator::Now());
+}
+
+void Visualizer::PhyEndDeviceState(EndDeviceLoraPhy::State state1, EndDeviceLoraPhy::State state2)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "PhyEndDeviceState"},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"DeviceState1", GetDeviceState(state1)},
+                                   {"DeviceState2", GetDeviceState(state2)}
+                                  },
+                                  Simulator::Now());
+}
+
+void Visualizer::MacTraceReceivedPacket(Ptr<ns3::Packet const> packet)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    Ptr<Packet> packet2 = packet->Copy();
+    LoraTag loraTag;
+    packet->PeekPacketTag(loraTag);
+
+    LorawanMacHeader macHeader;
+    packet2->RemoveHeader(macHeader);
+
+    LoraFrameHeader frameHeader;
+
+    frameHeader.SetAsDownlink();
+
+
+    packet2->RemoveHeader(frameHeader);
+    std::string devAddress;
+    if(m_deviceType==ED){
+        devAddress = m_netDevice->GetObject<LoraNetDevice>()
+                         ->GetMac()
+                         ->GetObject<EndDeviceLorawanMac>()
+                         ->GetDeviceAddress()
+                         .Print();
+    }else if(m_deviceType==GW){
+    }
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "PHYTraceReceivedPacket"},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"DeviceAddress", devAddress},
+                                   {"FrameHeaderAddress", frameHeader.GetAddress().Print()},
+                                   {"PacketUid", std::to_string(packet->GetUid())}
+                                  },
+                                  Simulator::Now());
+}
+
+void Visualizer::MobilityTraceCourseChange(Ptr<ns3::MobilityModel const> mobilityModel)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    std::string devAddress;
+    if(m_deviceType==ED){
+        devAddress = m_netDevice->GetObject<LoraNetDevice>()
+                         ->GetMac()
+                         ->GetObject<EndDeviceLorawanMac>()
+                         ->GetDeviceAddress()
+                         .Print();
+    }else if(m_deviceType==GW){
+    }
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "MobilityTraceCourseChange"},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"Position", Vector3DToString(mobilityModel->GetPosition())},
+                                   {"DeviceAddress", devAddress}
+                                  },
+                                  Simulator::Now());
+}
+
+std::string Visualizer::Vector3DToString(Vector3D vector3D){
+    NS_LOG_FUNCTION_NOARGS();
+    std::ostringstream oss;
+    oss<< vector3D.x <<","<< vector3D.y <<","<< vector3D.z;
+    return oss.str();
+}
+
+
+std::string Visualizer::GetDeviceType(Visualizer::DeviceType deviceType){
+    NS_LOG_FUNCTION_NOARGS();
+    switch (deviceType)
+    {
+    case Visualizer::ED:
+        return "EndDevice";
+    case Visualizer::GW:
+        return "Gateway";
+    case Visualizer::NS:
+        return "NetworkServer";
+    }
+}
+
+std::string Visualizer::GetDeviceState(EndDeviceLoraPhy::State state){
+    NS_LOG_FUNCTION_NOARGS();
+    switch (state)
+    {
+    case EndDeviceLoraPhy::State::SLEEP:
+        return "SLEEP";
+    case EndDeviceLoraPhy::State::STANDBY:
+        return "STANDBY";
+    case EndDeviceLoraPhy::State::TX:
+        return "TX";
+    case EndDeviceLoraPhy::State::RX:
+        return "RX";
+    }
+}
+
+} // namespace lorawan
+
+} // namespace ns3
