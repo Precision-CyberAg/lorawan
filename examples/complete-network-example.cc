@@ -301,6 +301,15 @@ main (int argc, char *argv[])
   nsHelper.SetGateways (gateways);
   nsHelper.Install (networkServer);
 
+
+
+  Ptr<ListPositionAllocator> allocatorNs = CreateObject<ListPositionAllocator> ();
+  // Make it so that nodes are at a certain height > 0
+  allocatorNs->Add (Vector (3000.0, 4000.0, 15.0));
+  mobility.SetPositionAllocator (allocatorNs);
+  mobility.Install (networkServer);
+
+
   //Create a forwarder for each gateway
   forHelper.Install (gateways);
 

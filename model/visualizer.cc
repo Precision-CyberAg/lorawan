@@ -20,6 +20,8 @@
 
 #include "ns3/visualizer.h"
 
+#include "ns3/point-to-point-net-device.h"
+#include "ns3/point-to-point-channel.h"
 #include "end-device-lorawan-mac.h"
 #include "gateway-lorawan-mac.h"
 #include "lora-frame-header.h"
@@ -107,13 +109,21 @@ Visualizer::StartApplication(void)
             // Handle for gws
         }
 
-        m_mobilityModel->TraceConnectWithoutContext("CourseChange", MakeCallback(&Visualizer::MobilityTraceCourseChange, this));
-        MobilityTraceCourseChange(m_mobilityModel);
+
     }
-    else
+    else if(Ptr<PointToPointNetDevice> p2pDev = m_netDevice->GetObject<PointToPointNetDevice>())
     {
+        Ptr<PointToPointChannel> p2pChannel = p2pDev->GetChannel()->GetObject<PointToPointChannel>();
+        p2pChannel->TraceConnectWithoutContext("TxRxPointToPoint", MakeCallback(&Visualizer::TxRxPointToPoint, this));
+        NS_LOG_DEBUG("p2p dev device!");
+    }
+    else{
         NS_LOG_DEBUG("Unspecified net device!");
     }
+
+    m_mobilityModel->TraceConnectWithoutContext("CourseChange", MakeCallback(&Visualizer::MobilityTraceCourseChange, this));
+    MobilityTraceCourseChange(m_mobilityModel);
+
 }
 
 void
@@ -123,6 +133,18 @@ Visualizer::StopApplication(void)
     NS_LOG_DEBUG("Hello!");
     FileManager& fileManager = FileManager::getInstance();
     fileManager.WriteToFile();
+}
+
+void Visualizer::TxRxPointToPoint(Ptr<const ns3::Packet> packet, Ptr<ns3::NetDevice> sender, Ptr<ns3::NetDevice> receiver, ns3::Time duration, ns3::Time lastBitReceiveTime)
+{
+    NS_LOG_FUNCTION_NOARGS();
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "TxRxPointToPoint"},
+                                   {"Sender", std::to_string(sender->GetNode()->GetId())},
+                                   {"Receiver", std::to_string(receiver->GetNode()->GetId())},
+                                   {"Duration", std::to_string(duration.GetMicroSeconds())},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
+
 }
 
 void

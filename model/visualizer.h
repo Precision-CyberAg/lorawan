@@ -89,6 +89,8 @@ public:
 
   void MobilityTraceCourseChange(Ptr<MobilityModel const> mobilityModel);
 
+  void TxRxPointToPoint(Ptr<const Packet> packet, Ptr<NetDevice> sender, Ptr<NetDevice> receiver, Time duration, Time lastBitReceiveTime);
+
 //  void EndDeviceLoraPhyTraceEndDeviceState(EndDeviceLoraPhy::State state);
 
 private:

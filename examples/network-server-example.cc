@@ -92,7 +92,7 @@ int main (int argc, char *argv[])
   //////////
 
   // End Device mobility
-  MobilityHelper mobilityEd, mobilityGw;
+  MobilityHelper mobilityEd, mobilityGw, mobilityNs;
   Ptr<ListPositionAllocator> positionAllocEd = CreateObject<ListPositionAllocator> ();
 //  positionAllocEd->Add (Vector (6000.0, 0.0, 0.0));
 //  positionAllocEd->Add (Vector (0.0, 100.0, 0.0));
@@ -103,6 +103,7 @@ int main (int argc, char *argv[])
                                 "X", StringValue("ns3::UniformRandomVariable[Min=0|Max=3500]"),
                                 "Y", StringValue("ns3::UniformRandomVariable[Min=0|Max=3500]"));
   mobilityEd.SetMobilityModel("ns3::RandomWalk2dMobilityModel",
+                              "Time", StringValue("0.1s"),
                             "Bounds", RectangleValue(Rectangle(0, 3500, 0, 3500)));
 
 
@@ -113,6 +114,14 @@ int main (int argc, char *argv[])
   positionAllocGw->Add (Vector (500.0, 0.0, 0.0));
   mobilityGw.SetPositionAllocator (positionAllocGw);
   mobilityGw.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+
+  // Network Server mobility
+  Ptr<ListPositionAllocator> positionAllocNs = CreateObject<ListPositionAllocator> ();
+  positionAllocNs->Add (Vector (4000.0, 0.0, 0.0));
+  positionAllocNs->Add (Vector (-4000.0, 0.0, 0.0));
+  positionAllocNs->Add (Vector (500.0, 0.0, 0.0));
+  mobilityNs.SetPositionAllocator (positionAllocNs);
+  mobilityNs.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 
   // Create the LoraPhyHelper
   LoraPhyHelper phyHelper = LoraPhyHelper ();
@@ -188,6 +197,9 @@ int main (int argc, char *argv[])
   networkServerHelper.SetGateways (gateways);
   networkServerHelper.SetEndDevices (endDevices);
   networkServerHelper.Install (networkServers);
+
+
+  mobilityNs.Install(networkServers);
 
   // Install the Forwarder application on the gateways
   ForwarderHelper forwarderHelper;
