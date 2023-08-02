@@ -22,6 +22,14 @@ build_lib_example(
 )
 
 build_lib_example(
+        NAME multiple-gateway-network-example
+        SOURCE_FILES multiple-gateway-network-example.cc
+        LIBRARIES_TO_LINK
+        ${libcore}
+        ${liblorawan}
+)
+
+build_lib_example(
   NAME adr-example
   SOURCE_FILES adr-example.cc
   LIBRARIES_TO_LINK
