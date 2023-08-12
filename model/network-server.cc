@@ -22,6 +22,7 @@
 #include "ns3/network-server.h"
 #include "ns3/net-device.h"
 #include "ns3/point-to-point-net-device.h"
+#include "ns3/wifi-net-device.h"
 #include "ns3/packet.h"
 #include "ns3/lorawan-mac-header.h"
 #include "ns3/lora-frame-header.h"
@@ -84,11 +85,11 @@ NetworkServer::AddGateway (Ptr<Node> gateway, Ptr<NetDevice> netDevice)
   NS_LOG_FUNCTION (this << gateway);
 
   // Get the PointToPointNetDevice
-  Ptr<PointToPointNetDevice> p2pNetDevice;
+  Ptr<WifiNetDevice> wifiNetDevice;
   for (uint32_t i = 0; i < gateway->GetNDevices (); i++)
     {
-      p2pNetDevice = gateway->GetDevice (i)->GetObject<PointToPointNetDevice> ();
-      if (p2pNetDevice != 0)
+      wifiNetDevice = gateway->GetDevice (i)->GetObject<WifiNetDevice> ();
+      if (wifiNetDevice != 0)
         {
           // We found a p2pNetDevice on the gateway
           break;
@@ -101,7 +102,7 @@ NetworkServer::AddGateway (Ptr<Node> gateway, Ptr<NetDevice> netDevice)
   NS_ASSERT (gwMac != 0);
 
   // Get the Address
-  Address gatewayAddress = p2pNetDevice->GetAddress ();
+  Address gatewayAddress = wifiNetDevice->GetAddress ();
 
   // Create new gatewayStatus
   Ptr<GatewayStatus> gwStatus = Create<GatewayStatus> (gatewayAddress,
@@ -157,6 +158,20 @@ NetworkServer::Receive (Ptr<NetDevice> device, Ptr<const Packet> packet,
 
   // Create a copy of the packet
   Ptr<Packet> myPacket = packet->Copy ();
+
+
+  bool hasLoraTag = false;
+  PacketTagIterator packeTagIterator = myPacket->GetPacketTagIterator();
+
+  while(packeTagIterator.HasNext()){
+    if(LoraTag::GetTypeId()==packeTagIterator.Next().GetTypeId()){
+      hasLoraTag = true;
+    }
+  }
+
+  if(!hasLoraTag){
+    return true;
+  }
 
   // Fire the trace source
   m_receivedPacket (packet);

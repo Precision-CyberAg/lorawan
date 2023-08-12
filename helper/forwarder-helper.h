@@ -47,6 +47,8 @@ public:
 
   void SetAttribute (std::string name, const AttributeValue &value);
 
+  void SetNsWifiNetDevice (Ptr<WifiNetDevice> nsWifiNetDevice);
+
   ApplicationContainer Install (NodeContainer c) const;
 
   ApplicationContainer Install (Ptr<Node> node) const;
@@ -55,6 +57,8 @@ private:
   Ptr<Application> InstallPriv (Ptr<Node> node) const;
 
   ObjectFactory m_factory;
+
+  Ptr<WifiNetDevice> m_nsWifiNetDevice;
 };
 
 } // namespace ns3

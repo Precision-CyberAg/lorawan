@@ -24,6 +24,7 @@
 #include "ns3/application.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/point-to-point-net-device.h"
+#include "ns3/wifi-net-device.h"
 #include "ns3/nstime.h"
 #include "ns3/attribute.h"
 
@@ -52,10 +53,11 @@ public:
   /**
    * Sets the P2P device to use to communicate with the NS.
    *
-   * \param pointToPointNetDevice The P2PNetDevice on this node.
+   * \param wifiNetDevice The P2PNetDevice on this node.
    */
-  void SetPointToPointNetDevice (Ptr<PointToPointNetDevice> pointToPointNetDevice);
+  void SetWifiNetDevice (Ptr<WifiNetDevice> wifiNetDevice);
 
+  void SetNsWifiNetDevice(Ptr<WifiNetDevice> nsWifiNetDevice);
   /**
    * Receive a packet from the LoraNetDevice.
    *
@@ -71,7 +73,7 @@ public:
   /**
    * Receive a packet from the PointToPointNetDevice
    */
-  bool ReceiveFromPointToPoint (Ptr<NetDevice> pointToPointNetDevice,
+  bool ReceiveFromWifi (Ptr<NetDevice> wifiNetDevice,
                                 Ptr<const Packet> packet, uint16_t protocol,
                                 const Address& sender);
 
@@ -88,9 +90,11 @@ public:
 private:
   Ptr<LoraNetDevice> m_loraNetDevice; //!< Pointer to the node's LoraNetDevice
 
-  Ptr<PointToPointNetDevice> m_pointToPointNetDevice; //!< Pointer to the
+  Ptr<WifiNetDevice> m_wifiNetDevice; //!< Pointer to the
   //!P2PNetDevice we use to
   //!communicate with the NS
+
+  Ptr<WifiNetDevice> m_nsWifiNetDevice;
 };
 
 } //namespace ns3

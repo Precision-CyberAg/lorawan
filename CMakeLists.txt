@@ -126,6 +126,11 @@ build_lib(
     ${libpoint-to-point}
     ${libbuildings}
     ${libmobility}
+    ${libcore}
+    ${libwifi}
+    ${libinternet}
+    ${libaodv}
+    ${libapplications}
   TEST_SOURCES
     test/utilities.cc
     test/lorawan-test-suite.cc

@@ -64,6 +64,7 @@ int main (int argc, char *argv[])
   LogComponentEnable ("ClassAEndDeviceLorawanMac", LOG_LEVEL_ALL);
    LogComponentEnable ("OneShotSender", LOG_LEVEL_ALL);
    LogComponentEnable("PointToPointNetDevice", LOG_LEVEL_ALL);
+   LogComponentEnable("WifiNetDevice", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkControllerComponent",LOG_LEVEL_ALL);
    LogComponentEnable("GatewayLorawanMac",LOG_LEVEL_ALL);
    LogComponentEnable ("Forwarder", LOG_LEVEL_ALL);
@@ -72,7 +73,7 @@ int main (int argc, char *argv[])
 //   LogComponentEnable ("DeviceStatus", LOG_LEVEL_ALL);
    LogComponentEnable ("GatewayStatus", LOG_LEVEL_ALL);
    LogComponentEnable("LoraChannel", LOG_LEVEL_ALL);
-   LogComponentEnable ("Visualizer", LOG_LEVEL_ALL);
+  //  LogComponentEnable ("Visualizer", LOG_LEVEL_ALL);
   LogComponentEnableAll (LOG_PREFIX_FUNC);
   LogComponentEnableAll (LOG_PREFIX_NODE);
   LogComponentEnableAll (LOG_PREFIX_TIME);

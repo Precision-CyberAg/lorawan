@@ -25,8 +25,11 @@
 #include "ns3/lora-net-device.h"
 #include "ns3/nstime.h"
 #include "ns3/attribute.h"
+#include <mutex>
 #include "ns3/lora-tag.h"
+#include "ns3/wifi-mac-header.h"
 #include "ns3/end-device-lora-phy.h"
+#include "ns3/wifi-module.h"
 #include "ctime"
 
 namespace ns3 {
@@ -91,6 +94,9 @@ public:
 
   void TxRxPointToPoint(Ptr<const Packet> packet, Ptr<NetDevice> sender, Ptr<NetDevice> receiver, Time duration, Time lastBitReceiveTime);
 
+  void WifiPhyTx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2,ns3::MpduInfo val3, unsigned short val4);
+
+  void WifiPhyRx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2, ns3::MpduInfo val3, ns3::SignalNoiseDbm val4, unsigned short val5);
 //  void EndDeviceLoraPhyTraceEndDeviceState(EndDeviceLoraPhy::State state);
 
 private:
@@ -129,15 +135,15 @@ public:
 
       oss<<"{\""<<time.GetSeconds()<<"\":{";
       for (const auto& pair : data) {
-          const std::string& key = pair.first;
+        //   const std::string& key = pair.first;
           oss<<"\""<<pair.first<<"\":";
           oss<<"\""<<pair.second<<"\"";
           dataLen--;
           if(dataLen!=0){
               oss<<",";
           }
-          const std::string& value = pair.second;
-          std::cout << "Key: " << key << ", Value: " << value << std::endl;
+        //   const std::string& value = pair.second;
+        //   std::cout << "Key: " << key << ", Value: " << value << std::endl;
       }
       oss<<"}}";
   }

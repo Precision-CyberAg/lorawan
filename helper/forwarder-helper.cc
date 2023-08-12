@@ -47,6 +47,12 @@ ForwarderHelper::SetAttribute (std::string name, const AttributeValue &value)
   m_factory.Set (name, value);
 }
 
+void
+ForwarderHelper::SetNsWifiNetDevice (Ptr<WifiNetDevice> nsWifiNetDevice){
+  NS_LOG_FUNCTION_NOARGS();
+  m_nsWifiNetDevice = nsWifiNetDevice;
+}
+
 ApplicationContainer
 ForwarderHelper::Install (Ptr<Node> node) const
 {
@@ -75,6 +81,7 @@ ForwarderHelper::InstallPriv (Ptr<Node> node) const
   app->SetNode (node);
   node->AddApplication (app);
 
+  app->SetNsWifiNetDevice(m_nsWifiNetDevice);
   // Link the Forwarder to the NetDevices
   for (uint32_t i = 0; i < node->GetNDevices (); i++)
     {
@@ -87,15 +94,15 @@ ForwarderHelper::InstallPriv (Ptr<Node> node) const
           loraNetDevice->SetReceiveCallback (MakeCallback
                                                (&Forwarder::ReceiveFromLora, app));
         }
-      else if (currentNetDevice->GetObject<PointToPointNetDevice> () != 0)
-        {
-          Ptr<PointToPointNetDevice> pointToPointNetDevice =
-            currentNetDevice->GetObject<PointToPointNetDevice> ();
+      else if (currentNetDevice->GetObject<WifiNetDevice> () != 0)
+        { 
+          Ptr<WifiNetDevice> wifiNetDevice =
+            currentNetDevice->GetObject<WifiNetDevice> ();
 
-          app->SetPointToPointNetDevice (pointToPointNetDevice);
+          app->SetWifiNetDevice (wifiNetDevice);
 
-          pointToPointNetDevice->SetReceiveCallback (MakeCallback
-                                                       (&Forwarder::ReceiveFromPointToPoint,
+          wifiNetDevice->SetReceiveCallback (MakeCallback
+                                                       (&Forwarder::ReceiveFromWifi,
                                                        app));
         }
       else

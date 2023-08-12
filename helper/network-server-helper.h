@@ -29,6 +29,15 @@
 #include "ns3/application-container.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/network-server.h"
+#include "ns3/aodv-module.h"
+#include "ns3/netanim-module.h"
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+#include "ns3/internet-module.h"
+#include "ns3/applications-module.h"
+#include "ns3/wifi-module.h"
+#include "ns3/udp-socket-factory.h"
+#include "ns3/ipv4-address.h"
 #include <stdint.h>
 #include <string>
 
@@ -85,9 +94,24 @@ private:
 
   PointToPointHelper p2pHelper; //!< Helper to create PointToPoint links
 
+  WifiHelper wifiHelper;
+
+  YansWifiPhyHelper yansWifiPhyHelper, malYansWifiPhyHelper;
+
+  YansWifiChannelHelper yansWifiChannelHelper, malYansWifiChannelHelper;
+
+  WifiMacHelper wifiMacHelper;
+
+  AodvHelper aodvHelper, malAodvHelper;
+
+  InternetStackHelper internetStackHelper, malInternetStackHelper;
+
+  Ipv4AddressHelper ipv4AddressHelper, malIpv4AddressHelper;
+
   bool m_adrEnabled;
 
   ObjectFactory m_adrSupportFactory;
+
 };
 
 } // namespace ns3

@@ -20,6 +20,12 @@
 
 #include "ns3/forwarder.h"
 #include "ns3/log.h"
+#include "ns3/lora-tag.h"
+#include "ns3/ipv4.h"
+#include "ns3/ipv4-interface.h"
+#include "ns3/ipv4-interface-address.h"
+#include "ns3/ipv4-interface-container.h"
+#include "ns3/wifi-phy.h"
 
 namespace ns3 {
 namespace lorawan {
@@ -49,12 +55,19 @@ Forwarder::~Forwarder ()
 }
 
 void
-Forwarder::SetPointToPointNetDevice (Ptr<PointToPointNetDevice>
-                                     pointToPointNetDevice)
+Forwarder::SetWifiNetDevice (Ptr<WifiNetDevice>
+                                     wifiNetDevice)
 {
-  NS_LOG_FUNCTION (this << pointToPointNetDevice);
+  NS_LOG_FUNCTION (this << wifiNetDevice);
 
-  m_pointToPointNetDevice = pointToPointNetDevice;
+  m_wifiNetDevice = wifiNetDevice;
+}
+
+void
+Forwarder::SetNsWifiNetDevice (Ptr<WifiNetDevice> nsWifiNetDevice){
+  NS_LOG_FUNCTION (this << nsWifiNetDevice);
+
+  m_nsWifiNetDevice = nsWifiNetDevice;
 }
 
 void
@@ -70,18 +83,25 @@ Forwarder::ReceiveFromLora (Ptr<NetDevice> loraNetDevice, Ptr<const Packet>
                             packet, uint16_t protocol, const Address& sender)
 {
   NS_LOG_FUNCTION (this << packet << protocol << sender);
+  NS_LOG_DEBUG(m_nsWifiNetDevice->GetAddress());
+
+  Ptr<Node> node = m_nsWifiNetDevice->GetNode();
+  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+
+  NS_LOG_DEBUG(ipv4->GetAddress(ipv4->GetInterfaceForDevice(m_nsWifiNetDevice),0).GetAddress());
+
 
   Ptr<Packet> packetCopy = packet->Copy ();
 
-  m_pointToPointNetDevice->Send (packetCopy,
-                                 m_pointToPointNetDevice->GetBroadcast (),
+  m_wifiNetDevice->Send (packetCopy,
+                                 m_nsWifiNetDevice->GetAddress(),
                                  0x800);
-
+  std::cout<<m_nsWifiNetDevice->GetAddress()<<std::endl;
   return true;
 }
 
 bool
-Forwarder::ReceiveFromPointToPoint (Ptr<NetDevice> pointToPointNetDevice,
+Forwarder::ReceiveFromWifi (Ptr<NetDevice> wifiNetDevice,
                                     Ptr<const Packet> packet, uint16_t protocol,
                                     const Address& sender)
 {
@@ -89,8 +109,16 @@ Forwarder::ReceiveFromPointToPoint (Ptr<NetDevice> pointToPointNetDevice,
 
   Ptr<Packet> packetCopy = packet->Copy ();
 
-  m_loraNetDevice->Send (packetCopy);
+  PacketTagIterator packetTagIterator = packetCopy -> GetPacketTagIterator();
+  while(packetTagIterator.HasNext()){
+    if(LoraTag::GetTypeId()==packetTagIterator.Next().GetTypeId()){
+      m_loraNetDevice->Send (packetCopy);
+      break;
+    }
+      
 
+  }
+  
   return true;
 }
 

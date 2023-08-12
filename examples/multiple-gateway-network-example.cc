@@ -82,13 +82,16 @@ main (int argc, char *argv[])
    LogComponentEnable("LoraPhyHelper", LOG_LEVEL_ALL);
    LogComponentEnable("LorawanMacHelper", LOG_LEVEL_ALL);
    LogComponentEnable("PeriodicSenderHelper", LOG_LEVEL_ALL);
+   LogComponentEnable("WifiNetDevice", LOG_LEVEL_ALL);
    LogComponentEnable("PeriodicSender", LOG_LEVEL_ALL);
    LogComponentEnable("LorawanMacHeader", LOG_LEVEL_ALL);
+   LogComponentEnable("Forwarder", LOG_LEVEL_ALL);
    LogComponentEnable("LoraFrameHeader", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkScheduler", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkServer", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkStatus", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkController", LOG_LEVEL_ALL);
+   LogComponentEnable("NetworkServerHelper", LOG_LEVEL_ALL);
 
   /***********
    *  Setup  *
@@ -205,9 +208,9 @@ main (int argc, char *argv[])
 
   Ptr<ListPositionAllocator> allocator = CreateObject<ListPositionAllocator> ();
   // Make it so that nodes are at a certain height > 0
-  allocator->Add (Vector (0.0, 0.0, 15.0));
-  allocator->Add(Vector (6000.0,0.0,15.0));
-  allocator->Add(Vector (1000.0,9000.0,15.0));
+  allocator->Add (Vector (100.0, 100.0, 15.0));
+  allocator->Add(Vector (200.0,100.0,15.0));
+  allocator->Add(Vector (150.0,150.0,15.0));
   allocator->Add(Vector(10000.0,-10000.0,15.0));
   mobility.SetPositionAllocator (allocator);
   mobility.Install (gateways);
@@ -308,11 +311,16 @@ main (int argc, char *argv[])
 
   Ptr<ListPositionAllocator> allocatorNs = CreateObject<ListPositionAllocator> ();
   // Make it so that nodes are at a certain height > 0
-  allocatorNs->Add (Vector (3000.0, 4000.0, 15.0));
+  allocatorNs->Add (Vector (130.0, 130.0, 15.0));
   mobility.SetPositionAllocator (allocatorNs);
   mobility.Install (networkServer);
 
 
+  Ptr<WifiNetDevice> nsWifiNetDevice = networkServer.Get(0)->GetDevice(0)->GetObject<WifiNetDevice>();
+  std::cout<< nsWifiNetDevice->GetAddress()<< std::endl;
+
+
+  forHelper.SetNsWifiNetDevice(nsWifiNetDevice);
   //Create a forwarder for each gateway
   forHelper.Install (gateways);
 

@@ -26,9 +26,14 @@
 #include "gateway-lorawan-mac.h"
 #include "lora-frame-header.h"
 #include "lorawan-mac-header.h"
+#include "ns3/wifi-net-device.h"
+#include "ns3/wifi-phy.h"
 
 #include "ns3/log.h"
 #include "ns3/packet.h"
+#include "ns3/ppp-header.h"
+#include "ns3/ipv4-header.h"
+#include "ns3/ipv4-interface.h"
 
 namespace ns3
 {
@@ -117,6 +122,10 @@ Visualizer::StartApplication(void)
         p2pChannel->TraceConnectWithoutContext("TxRxPointToPoint", MakeCallback(&Visualizer::TxRxPointToPoint, this));
         NS_LOG_DEBUG("p2p dev device!");
     }
+    else if(Ptr<WifiNetDevice> wifiDev = m_netDevice->GetObject<WifiNetDevice>() ){
+        wifiDev -> GetPhy() -> TraceConnectWithoutContext("MonitorSnifferTx", MakeCallback(&Visualizer::WifiPhyTx, this));
+        wifiDev -> GetPhy() -> TraceConnectWithoutContext("MonitorSnifferRx", MakeCallback(&Visualizer::WifiPhyRx, this));
+    }
     else{
         NS_LOG_DEBUG("Unspecified net device!");
     }
@@ -145,6 +154,41 @@ void Visualizer::TxRxPointToPoint(Ptr<const ns3::Packet> packet, Ptr<ns3::NetDev
                                    {"Duration", std::to_string(duration.GetMicroSeconds())},
                                    {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
 
+}
+
+  void Visualizer::WifiPhyTx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2,ns3::MpduInfo val3, unsigned short val4){
+    NS_LOG_FUNCTION_NOARGS();
+
+    Ptr<Packet> copy = packet->Copy();
+    Ipv4Header ipv4Header;
+    copy->PeekHeader(ipv4Header);
+
+    std::cout<<"oolala"<<std::endl;
+    copy->Print(std::cout);
+    NS_LOG_DEBUG(packet);
+
+    Ipv4Address sourceAddress = ipv4Header.GetSource();
+    Ipv4Address destinationAddress = ipv4Header.GetDestination();
+
+    std::cout<<ipv4Header.GetSource()<<std::endl;
+    std::cout<<ipv4Header.GetDestination()<<std::endl;
+    NS_LOG_DEBUG("Source IPv4 Address: " << sourceAddress);
+    NS_LOG_DEBUG("Destination IPv4 Address: " << destinationAddress);
+
+}
+
+void Visualizer::WifiPhyRx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2, ns3::MpduInfo val3, ns3::SignalNoiseDbm val4, unsigned short val5){
+    NS_LOG_FUNCTION_NOARGS(); 
+
+    Ptr<Packet> copy = packet->Copy();
+    Ipv4Header ipv4Header;
+    copy->PeekHeader(ipv4Header);
+
+    Ipv4Address sourceAddress = ipv4Header.GetSource();
+    Ipv4Address destinationAddress = ipv4Header.GetDestination();
+
+    NS_LOG_INFO("Source IPv4 Address: " << sourceAddress);
+    NS_LOG_INFO("Destination IPv4 Address: " << destinationAddress);
 }
 
 void
@@ -311,6 +355,8 @@ std::string Visualizer::GetDeviceType(Visualizer::DeviceType deviceType){
         return "Gateway";
     case Visualizer::NS:
         return "NetworkServer";
+    default:
+        return "Unknown";
     }
 }
 
@@ -326,6 +372,8 @@ std::string Visualizer::GetDeviceState(EndDeviceLoraPhy::State state){
         return "TX";
     case EndDeviceLoraPhy::State::RX:
         return "RX";
+    default:
+        return "Unknown";
     }
 }
 
