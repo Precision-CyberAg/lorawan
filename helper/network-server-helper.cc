@@ -114,8 +114,8 @@ NetworkServerHelper::SetGateways (NodeContainer gateways)
     NS_LOG_DEBUG(ipv4Container.GetAddress(i));
   }
   
-  PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
-  packetSinkHelper.Install(gateways).Start(Time(0));
+  // PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
+  // packetSinkHelper.Install(gateways).Start(Time(0));
   
 }
 
@@ -159,8 +159,8 @@ NetworkServerHelper::InstallPriv (Ptr<Node> node)
 
   NS_LOG_DEBUG(ipv4Container.GetAddress(0));
   
-  PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
-  packetSinkHelper.Install(node).Start(Time(0));
+  // PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
+  // packetSinkHelper.Install(node).Start(Time(0));
   
 
   // Cycle on each gateway
@@ -197,7 +197,7 @@ NetworkServerHelper::InstallPriv (Ptr<Node> node)
   for (uint32_t i = 0; i < node->GetNDevices (); i++)
     {
       Ptr<NetDevice> currentNetDevice = node->GetDevice (i);
-      std::cout<<currentNetDevice->GetAddress()<<std::endl;
+      std::cout<<currentNetDevice->GetInstanceTypeId().GetName()<<currentNetDevice->GetAddress()<<std::endl;
       currentNetDevice->SetReceiveCallback (MakeCallback
                                               (&NetworkServer::Receive,
                                               app));

@@ -32,6 +32,7 @@
 #include "ns3/node-container.h"
 #include "ns3/class-a-end-device-lorawan-mac.h"
 #include "ns3/mac-command.h"
+#include <iomanip>
 
 namespace ns3 {
 namespace lorawan {
@@ -155,11 +156,12 @@ NetworkServer::Receive (Ptr<NetDevice> device, Ptr<const Packet> packet,
                         uint16_t protocol, const Address& address)
 {
   NS_LOG_FUNCTION (this << packet << protocol << address);
+  NS_LOG_FUNCTION(device->GetInstanceTypeId().GetName());
 
   // Create a copy of the packet
   Ptr<Packet> myPacket = packet->Copy ();
 
-
+  NS_LOG_DEBUG("packet uid: "<<myPacket->GetUid());
   bool hasLoraTag = false;
   PacketTagIterator packeTagIterator = myPacket->GetPacketTagIterator();
 
@@ -169,9 +171,14 @@ NetworkServer::Receive (Ptr<NetDevice> device, Ptr<const Packet> packet,
     }
   }
 
+
+  PrintPacketData(myPacket);
+
+  
   if(!hasLoraTag){
     return true;
   }
+
 
   // Fire the trace source
   m_receivedPacket (packet);
@@ -186,6 +193,22 @@ NetworkServer::Receive (Ptr<NetDevice> device, Ptr<const Packet> packet,
   m_controller->OnNewPacket (packet);
 
   return true;
+}
+
+void NetworkServer::PrintPacketData(Ptr<Packet> packet) {
+    uint8_t buffer[packet->GetSize()];
+    packet->CopyData(buffer, packet->GetSize());
+
+    std::cout << "Packet Data (ASCII): ";
+    for (size_t i = 0; i < packet->GetSize(); ++i) {
+        char ch = static_cast<char>(buffer[i]);
+        if (std::isprint(ch)) {
+            std::cout << ch;
+        } else {
+            std::cout << '.';
+        }
+    }
+    std::cout << std::endl;
 }
 
 void

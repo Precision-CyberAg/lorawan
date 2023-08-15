@@ -99,6 +99,8 @@ public:
 
   Ptr<NetworkStatus> GetNetworkStatus (void);
 
+  void PrintPacketData(Ptr<Packet> packet) ;
+
 protected:
   Ptr<NetworkStatus> m_status;
   Ptr<NetworkController> m_controller;

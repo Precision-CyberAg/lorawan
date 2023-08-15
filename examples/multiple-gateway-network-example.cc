@@ -92,6 +92,7 @@ main (int argc, char *argv[])
    LogComponentEnable("NetworkStatus", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkController", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkServerHelper", LOG_LEVEL_ALL);
+   LogComponentEnable("Socket", LOG_LEVEL_ALL);
 
   /***********
    *  Setup  *
