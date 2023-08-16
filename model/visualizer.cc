@@ -312,6 +312,7 @@ std::string Visualizer::GetDeviceType(Visualizer::DeviceType deviceType){
     case Visualizer::NS:
         return "NetworkServer";
     }
+    return "NA";
 }
 
 std::string Visualizer::GetDeviceState(EndDeviceLoraPhy::State state){
@@ -327,6 +328,7 @@ std::string Visualizer::GetDeviceState(EndDeviceLoraPhy::State state){
     case EndDeviceLoraPhy::State::RX:
         return "RX";
     }
+    return "NA";
 }
 
 } // namespace lorawan

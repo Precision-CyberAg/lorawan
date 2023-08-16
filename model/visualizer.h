@@ -21,13 +21,16 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
-#include "ns3/application.h"
-#include "ns3/lora-net-device.h"
-#include "ns3/nstime.h"
-#include "ns3/attribute.h"
-#include "ns3/lora-tag.h"
-#include "ns3/end-device-lora-phy.h"
 #include "ctime"
+
+#include "ns3/application.h"
+#include "ns3/attribute.h"
+#include "ns3/end-device-lora-phy.h"
+#include "ns3/lora-net-device.h"
+#include "ns3/lora-tag.h"
+#include "ns3/nstime.h"
+
+#include <mutex>
 
 namespace ns3 {
 namespace lorawan {
