@@ -129,6 +129,7 @@ build_lib(
     ${libcore}
     ${libwifi}
     ${libinternet}
+    ${libinternet-apps}
     ${libaodv}
     ${libapplications}
   TEST_SOURCES

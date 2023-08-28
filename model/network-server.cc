@@ -98,7 +98,7 @@ NetworkServer::AddGateway (Ptr<Node> gateway, Ptr<NetDevice> netDevice)
     }
 
   // Get the gateway's LoRa MAC layer (assumes gateway's MAC is configured as first device)
-  Ptr<GatewayLorawanMac> gwMac = gateway->GetDevice (0)->GetObject<LoraNetDevice> ()->
+  Ptr<GatewayLorawanMac> gwMac = gateway->GetDevice (2)->GetObject<LoraNetDevice> ()->
     GetMac ()->GetObject<GatewayLorawanMac> ();
   NS_ASSERT (gwMac != 0);
 

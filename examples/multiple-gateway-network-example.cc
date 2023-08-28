@@ -93,6 +93,8 @@ main (int argc, char *argv[])
    LogComponentEnable("NetworkController", LOG_LEVEL_ALL);
    LogComponentEnable("NetworkServerHelper", LOG_LEVEL_ALL);
    LogComponentEnable("Socket", LOG_LEVEL_ALL);
+   LogComponentEnable("AodvRoutingProtocol",LOG_LEVEL_ALL);
+   LogComponentEnable("Visualizer", LOG_LEVEL_ALL);
 
   /***********
    *  Setup  *
@@ -209,10 +211,14 @@ main (int argc, char *argv[])
 
   Ptr<ListPositionAllocator> allocator = CreateObject<ListPositionAllocator> ();
   // Make it so that nodes are at a certain height > 0
-  allocator->Add (Vector (100.0, 100.0, 15.0));
-  allocator->Add(Vector (200.0,100.0,15.0));
-  allocator->Add(Vector (150.0,150.0,15.0));
-  allocator->Add(Vector(10000.0,-10000.0,15.0));
+//  allocator->Add (Vector (100.0, 200.0, 15.0));
+//  allocator->Add(Vector (100.0,300.0,15.0));
+//  allocator->Add(Vector (100.0,400.0,15.0));
+//  allocator->Add(Vector(10000.0,-10000.0,15.0));
+  allocator->Add (Vector (0.0, 0.0, 0.0));
+  allocator->Add(Vector (0.0,0.0,0.0));
+  allocator->Add(Vector (0.0,0.0,0.0));
+  allocator->Add(Vector(0.0,0.0,0.0));
   mobility.SetPositionAllocator (allocator);
   mobility.Install (gateways);
 
@@ -312,7 +318,7 @@ main (int argc, char *argv[])
 
   Ptr<ListPositionAllocator> allocatorNs = CreateObject<ListPositionAllocator> ();
   // Make it so that nodes are at a certain height > 0
-  allocatorNs->Add (Vector (130.0, 130.0, 15.0));
+  allocatorNs->Add (Vector (0.0, 0.0, 0.0));
   mobility.SetPositionAllocator (allocatorNs);
   mobility.Install (networkServer);
 
@@ -328,7 +334,7 @@ main (int argc, char *argv[])
 
   //Visualizer
   VisualizerHelper visHelper;
-  visHelper.SetSimulationTime(appStopTime + Hours (1));
+  visHelper.SetSimulationTime(appStopTime + Minutes(3));
   visHelper.Install(endDevices, Visualizer::DeviceType::ED);
   visHelper.Install(gateways, Visualizer::DeviceType::GW);
   visHelper.Install(networkServer, Visualizer::DeviceType::NS);
@@ -337,7 +343,7 @@ main (int argc, char *argv[])
   // Simulation //
   ////////////////
 
-  Simulator::Stop (appStopTime + Hours (1));
+  Simulator::Stop (appStopTime + Minutes(3));
 
   NS_LOG_INFO ("Running simulation...");
   Simulator::Run ();

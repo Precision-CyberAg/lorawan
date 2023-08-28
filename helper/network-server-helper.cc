@@ -27,7 +27,6 @@
 #include "ns3/simulator.h"
 #include "ns3/log.h"
 
-
 namespace ns3 {
 namespace lorawan {
 
@@ -39,57 +38,6 @@ NetworkServerHelper::NetworkServerHelper ()
   p2pHelper.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
   p2pHelper.SetChannelAttribute ("Delay", StringValue ("2ms"));
   SetAdr ("ns3::AdrComponent");
-
-  std::string phyMode ("DsssRate1Mbps");
-  yansWifiPhyHelper.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
-  
-  yansWifiChannelHelper.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  yansWifiChannelHelper.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel",
-    "SystemLoss", DoubleValue(1), "HeightAboveZ", DoubleValue(1.5));
-
-
-  // Configure for range near 250m
-  yansWifiPhyHelper.Set ("TxPowerStart", DoubleValue(33));
-  yansWifiPhyHelper.Set ("TxPowerEnd", DoubleValue(33));
-  yansWifiPhyHelper.Set ("TxPowerLevels", UintegerValue(1));
-  yansWifiPhyHelper.Set ("TxGain", DoubleValue(0));
-  yansWifiPhyHelper.Set ("RxGain", DoubleValue(0));
-  yansWifiPhyHelper.Set ("CcaEdThreshold", DoubleValue(-61.8));
-  // yansWifiPhyHelper.Set ("CcaMode1Threshold", DoubleValue(-64.8));
-  yansWifiPhyHelper.SetChannel (yansWifiChannelHelper.Create ());
-
-
-  malYansWifiPhyHelper.SetPcapDataLinkType (YansWifiPhyHelper::DLT_IEEE802_11);
-  malYansWifiChannelHelper.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  malYansWifiChannelHelper.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel",
-    "SystemLoss", DoubleValue(1), "HeightAboveZ", DoubleValue(1.5));
-
-  // Configure for range near 250m
-  malYansWifiPhyHelper.Set ("TxPowerStart", DoubleValue(100));
-  malYansWifiPhyHelper.Set ("TxPowerEnd", DoubleValue(100));
-  malYansWifiPhyHelper.Set ("TxPowerLevels", UintegerValue(1));
-  malYansWifiPhyHelper.Set ("TxGain", DoubleValue(0));
-  malYansWifiPhyHelper.Set ("RxGain", DoubleValue(0));
-  malYansWifiPhyHelper.Set ("CcaEdThreshold", DoubleValue(-61.8));
-  // malYansWifiPhyHelper.Set  ("CcaMode1Threshold", DoubleValue(-64.8));
-  malYansWifiPhyHelper.SetChannel (malYansWifiChannelHelper.Create ());  
-
-
-  wifiMacHelper.SetType("ns3::AdhocWifiMac");
-
-  wifiHelper.SetStandard(WIFI_STANDARD_80211b);
-  wifiHelper.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
-    "DataMode",StringValue(phyMode), "ControlMode",StringValue(phyMode));
-
-  internetStackHelper.SetRoutingHelper(aodvHelper);
-
-  malInternetStackHelper.SetRoutingHelper(malAodvHelper);
-
-  ipv4AddressHelper.SetBase("10.0.1.0", "255.255.255.0");
-
-  malIpv4AddressHelper.SetBase("10.1.2.0", "255.255.255.0");
-  
-
 }
 
 NetworkServerHelper::~NetworkServerHelper ()
@@ -106,17 +54,6 @@ void
 NetworkServerHelper::SetGateways (NodeContainer gateways)
 {
   m_gateways = gateways;
-  NetDeviceContainer netDevices = wifiHelper.Install(yansWifiPhyHelper, wifiMacHelper, m_gateways);
-  internetStackHelper.Install(gateways);
-  Ipv4InterfaceContainer ipv4Container =  ipv4AddressHelper.Assign(netDevices);
-
-  for(uint32_t i = 0 ; i < ipv4Container.GetN() ; i++){
-    NS_LOG_DEBUG(ipv4Container.GetAddress(i));
-  }
-  
-  // PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
-  // packetSinkHelper.Install(gateways).Start(Time(0));
-  
 }
 
 void
@@ -153,51 +90,23 @@ NetworkServerHelper::InstallPriv (Ptr<Node> node)
   app->SetNode (node);
   node->AddApplication (app);
 
-  NetDeviceContainer nsWifiContainer = wifiHelper.Install(yansWifiPhyHelper, wifiMacHelper, node);
-  internetStackHelper.Install(node);
-  Ipv4InterfaceContainer ipv4Container = ipv4AddressHelper.Assign(nsWifiContainer);
-
-  NS_LOG_DEBUG(ipv4Container.GetAddress(0));
-  
-  // PacketSinkHelper packetSinkHelper("ns3::UdpSocketFactory", InetSocketAddress(Ipv4Address::GetAny(), 6666));
-  // packetSinkHelper.Install(node).Start(Time(0));
-  
-
   // Cycle on each gateway
-  // for (NodeContainer::Iterator i = m_gateways.Begin ();
-  //      i != m_gateways.End ();
-  //      i++)
-  //   {
-  //     // Add the connections with the gateway
-  //     // Create a PointToPoint link between gateway and NS
-  //     // NetDeviceContainer container = p2pHelper.Install (node, *i);
+  for (NodeContainer::Iterator i = m_gateways.Begin ();
+       i != m_gateways.End ();
+       i++)
+    {
+      // Add the connections with the gateway
+      // Create a PointToPoint link between gateway and NS
+      NetDeviceContainer container = p2pHelper.Install (node, *i);
 
-  //     // Add the gateway to the NS list
-      
-  //     app->AddGateway (*i, container.Get (0));
-  //   }
-
-  for(uint32_t i = 0 ; i < m_gateways.GetN(); i++){
-    Ptr<Node> gatewayNode = m_gateways.Get(i);
-    
-    for(uint32_t j = 0 ; j < gatewayNode->GetNDevices(); j++) {
-      Ptr<NetDevice> gatewayNetDevice = gatewayNode->GetDevice(j);
-      if(gatewayNetDevice->GetObject<WifiNetDevice>()){
-        std::cout<< "Found a wifi net device";
-        Ptr<WifiNetDevice> wifiNetDevice = gatewayNetDevice->GetObject<WifiNetDevice>();
-        app->AddGateway(gatewayNode, gatewayNetDevice);
-      }else{
-        std::cout<< "Found something else";
-      }
+      // Add the gateway to the NS list
+      app->AddGateway (*i, container.Get (0));
     }
-    
-  }
 
   // Link the NetworkServer to its NetDevices
   for (uint32_t i = 0; i < node->GetNDevices (); i++)
     {
       Ptr<NetDevice> currentNetDevice = node->GetDevice (i);
-      std::cout<<currentNetDevice->GetInstanceTypeId().GetName()<<currentNetDevice->GetAddress()<<std::endl;
       currentNetDevice->SetReceiveCallback (MakeCallback
                                               (&NetworkServer::Receive,
                                               app));

@@ -21,16 +21,19 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
-#include "ns3/application.h"
-#include "ns3/lora-net-device.h"
-#include "ns3/nstime.h"
-#include "ns3/attribute.h"
-#include <mutex>
-#include "ns3/lora-tag.h"
-#include "ns3/wifi-mac-header.h"
-#include "ns3/end-device-lora-phy.h"
-#include "ns3/wifi-module.h"
 #include "ctime"
+
+#include "ns3/application.h"
+#include "ns3/attribute.h"
+#include "ns3/end-device-lora-phy.h"
+#include "ns3/ipv4.h"
+#include "ns3/lora-net-device.h"
+#include "ns3/lora-tag.h"
+#include "ns3/nstime.h"
+#include "ns3/wifi-mac-header.h"
+#include "ns3/wifi-module.h"
+
+#include <mutex>
 
 namespace ns3 {
 namespace lorawan {
@@ -97,7 +100,18 @@ public:
   void WifiPhyTx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2,ns3::MpduInfo val3, unsigned short val4);
 
   void WifiPhyRx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2, ns3::MpduInfo val3, ns3::SignalNoiseDbm val4, unsigned short val5);
+
+  void WifiPhyRxEnd(Ptr<const Packet> packet);
+
+  void WifiPacketReceivedCallback(Ptr<const Packet> packet, const WifiMacHeader &hdr, const WifiTxVector &txVector, MpduInfo aMpdu);
 //  void EndDeviceLoraPhyTraceEndDeviceState(EndDeviceLoraPhy::State state);
+  void Ipv4TxTrace(Ptr<const Packet> p,
+                          Ptr<Ipv4> ipv4,
+                          uint32_t interfaceIndex);
+
+  void Ipv4RxTrace(Ptr<const Packet> p,
+                          Ptr<Ipv4> ipv4,
+                          uint32_t interfaceIndex);
 
 private:
   Ptr<NetDevice> m_netDevice; //!< Pointer to the node's LoraNetDevice

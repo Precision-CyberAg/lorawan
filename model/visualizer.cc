@@ -20,20 +20,25 @@
 
 #include "ns3/visualizer.h"
 
-#include "ns3/point-to-point-net-device.h"
-#include "ns3/point-to-point-channel.h"
 #include "end-device-lorawan-mac.h"
 #include "gateway-lorawan-mac.h"
 #include "lora-frame-header.h"
 #include "lorawan-mac-header.h"
-#include "ns3/wifi-net-device.h"
-#include "ns3/wifi-phy.h"
 
-#include "ns3/log.h"
-#include "ns3/packet.h"
-#include "ns3/ppp-header.h"
+#include "ns3/core-config.h"
+#include "ns3/core-module.h"
 #include "ns3/ipv4-header.h"
 #include "ns3/ipv4-interface.h"
+#include "ns3/ipv4.h"
+#include "ns3/log.h"
+#include "ns3/packet.h"
+#include "ns3/point-to-point-channel.h"
+#include "ns3/point-to-point-net-device.h"
+#include "ns3/ppp-header.h"
+#include "ns3/wifi-module.h"
+#include "ns3/wifi-net-device.h"
+#include "ns3/wifi-phy.h"
+#include "ns3/internet-module.h"
 
 namespace ns3
 {
@@ -125,15 +130,53 @@ Visualizer::StartApplication(void)
     else if(Ptr<WifiNetDevice> wifiDev = m_netDevice->GetObject<WifiNetDevice>() ){
         wifiDev -> GetPhy() -> TraceConnectWithoutContext("MonitorSnifferTx", MakeCallback(&Visualizer::WifiPhyTx, this));
         wifiDev -> GetPhy() -> TraceConnectWithoutContext("MonitorSnifferRx", MakeCallback(&Visualizer::WifiPhyRx, this));
+//        wifiDev -> GetPhy() ->TraceConnectWithoutContext("PhyRxEnd", MakeCallback(&Visualizer::WifiPhyRxEnd, this));
+//        wifiDev -> GetMac() ->TraceConnectWithoutContext("",MakeCallback(&Visualizer::WifiPacketReceivedCallback, this));
+//        Ptr<Ipv4L3Protocol> protocol = wifiDev -> GetNode() ->GetObject<Ipv4L3Protocol>();
+//        protocol->TraceConnectWithoutContext("Tx", MakeCallback(&Visualizer::Ipv4TxTrace, this));
+//        protocol->TraceConnectWithoutContext("Rx", MakeCallback(&Visualizer::Ipv4RxTrace, this));
+        NS_LOG_FUNCTION_NOARGS();
     }
     else{
         NS_LOG_DEBUG("Unspecified net device!");
     }
 
+
     m_mobilityModel->TraceConnectWithoutContext("CourseChange", MakeCallback(&Visualizer::MobilityTraceCourseChange, this));
     MobilityTraceCourseChange(m_mobilityModel);
 
 }
+//
+void
+Visualizer::Ipv4TxTrace(Ptr<const Packet> p,
+                                Ptr<Ipv4> ipv4,
+                                uint32_t interfaceIndex)
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+}
+
+void
+Visualizer::Ipv4RxTrace(Ptr<const Packet> p,
+                                Ptr<Ipv4> ipv4,
+                                uint32_t interfaceIndex)
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+}
+//
+//Ptr<Node>
+//Visualizer::GetNodeFromContext(const std::string& context) const
+//{
+//    // Use "NodeList/*/ as reference
+//    // where element [1] is the Node Id
+//
+//    std::vector<std::string> elements = GetElementsFromContext(context);
+//    Ptr<Node> n = NodeList::GetNode(std::stoi(elements.at(1)));
+//    NS_ASSERT(n);
+//
+//    return n;
+//}
 
 void
 Visualizer::StopApplication(void)
@@ -156,12 +199,28 @@ void Visualizer::TxRxPointToPoint(Ptr<const ns3::Packet> packet, Ptr<ns3::NetDev
 
 }
 
+void Visualizer::WifiPacketReceivedCallback(Ptr<const ns3::Packet> packet, const ns3::WifiMacHeader& hdr, const ns3::WifiTxVector& txVector, ns3::MpduInfo aMpdu)
+{
+    NS_LOG_FUNCTION_NOARGS();
+
+    Ptr<Packet> copy = packet->Copy();
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "WifiPhyPacketReceived"},
+                                   //                                   {"Sender", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   //                                   {"Receiver", std::to_string(receiver->GetNode()->GetId())},
+                                   //                                   {"Duration", std::to_string(duration.GetMicroSeconds())},
+                                   {"PacketUid", std::to_string(copy->GetUid())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
+
+}
+
   void Visualizer::WifiPhyTx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2,ns3::MpduInfo val3, unsigned short val4){
     NS_LOG_FUNCTION_NOARGS();
 
     Ptr<Packet> copy = packet->Copy();
     Ipv4Header ipv4Header;
-    copy->PeekHeader(ipv4Header);
+    copy->RemoveHeader(ipv4Header);
 
     std::cout<<"oolala"<<std::endl;
     copy->Print(std::cout);
@@ -175,7 +234,57 @@ void Visualizer::TxRxPointToPoint(Ptr<const ns3::Packet> packet, Ptr<ns3::NetDev
     NS_LOG_DEBUG("Source IPv4 Address: " << sourceAddress);
     NS_LOG_DEBUG("Destination IPv4 Address: " << destinationAddress);
 
+
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "WifiPhyTx"},
+//                                   {"Sender", std::to_string(m_netDevice->GetNode()->GetId())},
+//                                   {"Receiver", std::to_string(receiver->GetNode()->GetId())},
+//                                   {"Duration", std::to_string(duration.GetMicroSeconds())},
+                                   {"PacketUid", std::to_string(copy->GetUid())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
+
 }
+
+  void Visualizer::WifiPhyRxEnd(Ptr<const Packet> packet){
+    NS_LOG_FUNCTION(packet->GetUid());
+    NS_LOG_FUNCTION(packet);
+    Ptr<Packet> copy = packet->Copy();
+
+
+    Ipv4Header ipv4Header;
+    copy->PeekHeader(ipv4Header);
+
+    Ipv4Address sourceAddress = ipv4Header.GetSource();
+    Ipv4Address destinationAddress = ipv4Header.GetDestination();
+
+    NS_LOG_INFO("Source IPv4 Address: " << sourceAddress);
+    NS_LOG_INFO("Destination IPv4 Address: " << destinationAddress);
+
+    // Headers must be removed in the order they're present.
+    PppHeader pppHeader;
+    copy->RemoveHeader(pppHeader);
+    Ipv4Header ipHeader;
+    copy->RemoveHeader(ipHeader);
+
+    std::cout << "Source IP: ";
+    ipHeader.GetSource().Print(std::cout);
+    std::cout << std::endl;
+
+    std::cout << "Destination IP: ";
+    ipHeader.GetDestination().Print(std::cout);
+    std::cout << std::endl;
+
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "WifiPhyRxEnd"},
+                                   //                                   {"Sender", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   //                                   {"Receiver", std::to_string(receiver->GetNode()->GetId())},
+                                   //                                   {"Duration", std::to_string(duration.GetMicroSeconds())},
+                                   {"PacketUid", std::to_string(copy->GetUid())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
+
+  }
 
 void Visualizer::WifiPhyRx(Ptr<const Packet> packet, unsigned short val1, ns3::WifiTxVector val2, ns3::MpduInfo val3, ns3::SignalNoiseDbm val4, unsigned short val5){
     NS_LOG_FUNCTION_NOARGS(); 
@@ -189,6 +298,15 @@ void Visualizer::WifiPhyRx(Ptr<const Packet> packet, unsigned short val1, ns3::W
 
     NS_LOG_INFO("Source IPv4 Address: " << sourceAddress);
     NS_LOG_INFO("Destination IPv4 Address: " << destinationAddress);
+
+    FileManager& fileManager = FileManager::getInstance();
+    fileManager.WriteToJSONStream({{"TraceType", "WifiPhyRx"},
+                                   //                                   {"Sender", std::to_string(m_netDevice->GetNode()->GetId())},
+                                   //                                   {"Receiver", std::to_string(receiver->GetNode()->GetId())},
+                                   //                                   {"Duration", std::to_string(duration.GetMicroSeconds())},
+                                   {"PacketUid", std::to_string(copy->GetUid())},
+                                   {"DeviceType", GetDeviceType(m_deviceType)},
+                                   {"NodeId", std::to_string(m_netDevice->GetNode()->GetId())}}, Simulator::Now());
 }
 
 void

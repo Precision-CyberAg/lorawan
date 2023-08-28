@@ -14,6 +14,10 @@ def build(bld):
     obj = bld.create_ns3_program('multiple-gateway-network-example', ['lorawan'])
         obj.source = 'multiple-gateway-network-example'
 
+    obj = bld.create_ns3_program('gateway-network-server-wireless', ['lorawan'])
+            obj.source = 'gateway-network-server-wireless'
+
+
     obj = bld.create_ns3_program('adr-example', ['lorawan'])
     obj.source = 'adr-example.cc'
 

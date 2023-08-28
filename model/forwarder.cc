@@ -19,12 +19,15 @@
  */
 
 #include "ns3/forwarder.h"
-#include "ns3/log.h"
-#include "ns3/lora-tag.h"
-#include "ns3/ipv4.h"
-#include "ns3/ipv4-interface.h"
+
+#include "../../internet/model/udp-socket-factory.h"
+
 #include "ns3/ipv4-interface-address.h"
 #include "ns3/ipv4-interface-container.h"
+#include "ns3/ipv4-interface.h"
+#include "ns3/ipv4.h"
+#include "ns3/log.h"
+#include "ns3/lora-tag.h"
 #include "ns3/wifi-phy.h"
 
 namespace ns3 {
@@ -86,16 +89,39 @@ Forwarder::ReceiveFromLora (Ptr<NetDevice> loraNetDevice, Ptr<const Packet>
   NS_LOG_DEBUG(m_nsWifiNetDevice->GetAddress());
 
   Ptr<Node> node = m_nsWifiNetDevice->GetNode();
-  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+  Ptr<Ipv4> ipv4Ns = node->GetObject<Ipv4>();
 
-  NS_LOG_DEBUG(ipv4->GetAddress(ipv4->GetInterfaceForDevice(m_nsWifiNetDevice),0).GetAddress());
+  Ptr<Ipv4> ipv4Gw = m_wifiNetDevice->GetNode()->GetObject<Ipv4>();
+
+  NS_LOG_DEBUG(ipv4Ns->GetAddress(ipv4Ns->GetInterfaceForDevice(m_nsWifiNetDevice),0).GetAddress());
 
 
   Ptr<Packet> packetCopy = packet->Copy ();
 
-  m_wifiNetDevice->Send (packetCopy,
-                                 m_nsWifiNetDevice->GetAddress(),
-                                 0x800);
+//  m_wifiNetDevice->Send (packetCopy,
+//                                 m_nsWifiNetDevice->GetAddress(),
+//                                 0x800);
+
+
+  // Create a UDP socket
+  Ptr<Socket> socket = Socket::CreateSocket (m_wifiNetDevice->GetNode(), UdpSocketFactory::GetTypeId ());
+
+  // Define a destination address and port
+  Ipv4Address remoteAddress = ipv4Ns->GetAddress(ipv4Ns->GetInterfaceForDevice(m_nsWifiNetDevice),0).GetAddress();
+  uint16_t remotePort = 6666;
+
+  // Bind the socket to a local port
+  InetSocketAddress local = InetSocketAddress (
+      ipv4Gw->GetAddress(ipv4Gw->GetInterfaceForDevice(m_wifiNetDevice),0).GetAddress(),
+      7777);
+  socket->Bind (local);
+
+  // Create and send a packet
+  socket->SendTo (packetCopy, 0, InetSocketAddress (remoteAddress, remotePort));
+
+  socket->Close();
+
+
   std::cout<<m_nsWifiNetDevice->GetAddress()<<std::endl;
   return true;
 }

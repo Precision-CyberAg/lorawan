@@ -30,6 +30,14 @@ build_lib_example(
 )
 
 build_lib_example(
+        NAME gateway-network-server-wireless
+        SOURCE_FILES gateway-network-server-wireless.cc
+        LIBRARIES_TO_LINK
+        ${libcore}
+        ${liblorawan}
+)
+
+build_lib_example(
   NAME adr-example
   SOURCE_FILES adr-example.cc
   LIBRARIES_TO_LINK
