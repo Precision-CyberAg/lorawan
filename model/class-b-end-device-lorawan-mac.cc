@@ -196,6 +196,7 @@ ClassBEndDeviceLorawanMac::Receive (Ptr<Packet const> packet)
           if(packetCopy->PeekPacketTag(beaconTag)){
               //Found a beacon tag
               NS_LOG_DEBUG("Received a beacon packet with time: "<<beaconTag.GetTime());
+              m_receivedPacket (packet);
 
               //Schedule Ping Slots
               //Calculate Ping Slot Start time
@@ -347,7 +348,7 @@ void ClassBEndDeviceLorawanMac::OpenPingSlotReceiveWindow()
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& pingSlotReceiveWindowDuration = Seconds((m_pingSlotReceiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& pingSlotReceiveWindowDuration = Seconds((m_pingSlotReceiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for second receive window: "<<pingSlotReceiveWindowDuration.GetSeconds());
   m_closeBeaconReceiveWindow = Simulator::Schedule (pingSlotReceiveWindowDuration,
                                                    &ClassBEndDeviceLorawanMac::ClosePingSlotReceiveWindow, this);
@@ -367,8 +368,6 @@ void ClassBEndDeviceLorawanMac::ClosePingSlotReceiveWindow()
   switch (phy->GetState ())
   {
   case EndDeviceLoraPhy::TX:
-        NS_ABORT_MSG ("PHY was in TX mode when attempting to " <<
-                     "close a receive window.");
         break;
   case EndDeviceLoraPhy::RX:
         // PHY is receiving: let it finish. The Receive method will switch it back to SLEEP.
@@ -413,7 +412,7 @@ void ClassBEndDeviceLorawanMac::OpenBeaconReceiveWindow()
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& beaconReceiveWindowDuration = Seconds((m_beaconReceiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& beaconReceiveWindowDuration = Seconds((m_beaconReceiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for second receive window: "<<beaconReceiveWindowDuration.GetSeconds());
   m_closeBeaconReceiveWindow = Simulator::Schedule (beaconReceiveWindowDuration,
                                             &ClassBEndDeviceLorawanMac::CloseBeaconReceiveWindow, this);
@@ -471,7 +470,7 @@ ClassBEndDeviceLorawanMac::OpenFirstReceiveWindow (void)
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for first receive window: "<<firstReceiveWindowDuration.GetSeconds());
   m_closeFirstWindow = Simulator::Schedule (firstReceiveWindowDuration,
                                             &ClassBEndDeviceLorawanMac::CloseFirstReceiveWindow, this); //m_receiveWindowDuration
@@ -548,7 +547,7 @@ ClassBEndDeviceLorawanMac::OpenSecondReceiveWindow (void)
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& secondReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& secondReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for second receive window: "<<secondReceiveWindowDuration.GetSeconds());
   m_closeSecondWindow = Simulator::Schedule (secondReceiveWindowDuration,
                                              &ClassBEndDeviceLorawanMac::CloseSecondReceiveWindow, this);

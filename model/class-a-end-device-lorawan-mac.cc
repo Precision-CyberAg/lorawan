@@ -311,7 +311,8 @@ ClassAEndDeviceLorawanMac::OpenFirstReceiveWindow (void)
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  // const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for first receive window: "<<firstReceiveWindowDuration.GetSeconds());
   m_closeFirstWindow = Simulator::Schedule (firstReceiveWindowDuration,
                                             &ClassAEndDeviceLorawanMac::CloseFirstReceiveWindow, this); //m_receiveWindowDuration
@@ -388,7 +389,8 @@ ClassAEndDeviceLorawanMac::OpenSecondReceiveWindow (void)
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& secondReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  // const Time& secondReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& secondReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for second receive window: "<<secondReceiveWindowDuration.GetSeconds());
   m_closeSecondWindow = Simulator::Schedule (secondReceiveWindowDuration,
                                              &ClassAEndDeviceLorawanMac::CloseSecondReceiveWindow, this);
