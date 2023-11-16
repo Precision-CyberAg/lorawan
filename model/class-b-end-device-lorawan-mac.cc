@@ -432,8 +432,6 @@ void ClassBEndDeviceLorawanMac::CloseBeaconReceiveWindow()
   switch (phy->GetState ())
   {
   case EndDeviceLoraPhy::TX:
-        NS_ABORT_MSG ("PHY was in TX mode when attempting to " <<
-                     "close a receive window.");
         break;
   case EndDeviceLoraPhy::RX:
         // PHY is receiving: let it finish. The Receive method will switch it back to SLEEP.
