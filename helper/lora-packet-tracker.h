@@ -107,6 +107,12 @@ public:
   //                            macPacketTracker, RetransmissionData reTransmissionTracker,
   //                            PhyPacketData packetTracker);
 
+  uint32_t packetSCount=0;
+  uint32_t packetUCount=0;
+  uint32_t packetICount=0;
+  uint32_t packetRCount=0;
+  uint32_t packetTCount=0;
+
   /**
    * Count packets to evaluate the performance at PHY level of a specific
    * gateway.

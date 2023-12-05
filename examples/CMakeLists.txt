@@ -20,6 +20,13 @@ build_lib_example(
     ${libcore}
     ${liblorawan}
 )
+build_lib_example(
+        NAME lora-device-classes-example
+        SOURCE_FILES lora-device-classes-example.cc
+        LIBRARIES_TO_LINK
+        ${libcore}
+        ${liblorawan}
+)
 
 build_lib_example(
         NAME multiple-gateway-network-example
