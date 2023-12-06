@@ -67,7 +67,7 @@ ClassCEndDeviceLorawanMac::~ClassCEndDeviceLorawanMac ()
 /////////////////////
 // Sending methods //
 /////////////////////
-
+double tx_freq = 0;
 void
 ClassCEndDeviceLorawanMac::SendToPhy (Ptr<Packet> packetToSend)
 {
@@ -119,6 +119,7 @@ ClassCEndDeviceLorawanMac::SendToPhy (Ptr<Packet> packetToSend)
 
   // Switch the PHY to the channel so that it will listen here for downlink
   m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (txChannel->GetFrequency ());
+  tx_freq = txChannel->GetFrequency();
 
   // Instruct the PHY on the right Spreading Factor to listen for during the window
   // create a SetReplyDataRate function?
@@ -291,6 +292,23 @@ ClassCEndDeviceLorawanMac::OpenFirstReceiveWindow (void)
   // Set Phy in Standby mode
   m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
 
+  //ADDED FOR FIXING DOWNLINK PARAMS SET BY RX2, OPENING BEFORE RX1
+
+  // Switch the PHY to the channel so that it will listen here for downlink
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (tx_freq);
+
+  // Instruct the PHY on the right Spreading Factor to listen for during the window
+  // create a SetReplyDataRate function?
+  uint8_t replyDataRate = GetFirstReceiveWindowDataRate ();
+  NS_LOG_DEBUG ("m_dataRate: " << unsigned (m_dataRate) <<
+               ", m_rx1DrOffset: " << unsigned (m_rx1DrOffset) <<
+               ", replyDataRate: " << unsigned (replyDataRate) << ".");
+
+  m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor
+      (GetSfFromDataRate (replyDataRate));
+
+  //FIX FOR SETTING CORRECT RX1 PARAMS ENDS HERE
+
   uint8_t sfFromDataRate = GetSfFromDataRate(GetFirstReceiveWindowDataRate());
   NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
 
@@ -304,7 +322,7 @@ ClassCEndDeviceLorawanMac::OpenFirstReceiveWindow (void)
   // Schedule return to sleep after "at least the time required by the end
   // device's radio transceiver to effectively detect a downlink preamble"
   // (LoraWAN specification)
-  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym)+4.25);
+  const Time& firstReceiveWindowDuration = Seconds((m_receiveWindowDurationInSymbols * tSym));
   NS_LOG_DEBUG("Duration for first receive window: "<<firstReceiveWindowDuration.GetSeconds());
   m_closeFirstWindow = Simulator::Schedule (firstReceiveWindowDuration,
                                             &ClassCEndDeviceLorawanMac::CloseFirstReceiveWindow, this); //m_receiveWindowDuration
