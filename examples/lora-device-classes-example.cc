@@ -45,6 +45,7 @@ char endDeviceType = 'B';
 int m_gateway_reception_paths = 8;
 bool m_gateway_tx_priority = true;
 bool m_gw_beaconing_devices_a_c = true;
+int m_maxReTransmissionAttempts = 8;
 
 // Channel model
 bool realisticChannelModel = true;
@@ -71,6 +72,7 @@ main(int argc, char* argv[])
    cmd.AddValue("gatewayReceptionPaths", "Number of gateway's parallel reception paths", m_gateway_reception_paths);
    cmd.AddValue("gatewayTxPriority", "Gateway Tx priority over Rx", m_gateway_tx_priority);
    cmd.AddValue("gatewayBeaconingForDeviceClasses_A_C", "Determines whether GW should be performing beaconing when the devices used in simulation belong to A/C classes", m_gw_beaconing_devices_a_c);
+   cmd.AddValue("endDeviceMaxRetransmissions", "Number of retransmission attempts for confirmed traffic of end devices", m_maxReTransmissionAttempts);
    cmd.Parse(argc, argv);
 
    // Set up logging
@@ -220,6 +222,9 @@ main(int argc, char* argv[])
        {
            edLoraMac->SetMType(mType2);
        }
+
+       //Set Retransmissions Attempt value for end devices
+       edLoraMac->SetMaxNumberOfTransmissions(m_maxReTransmissionAttempts);
    }
 
    // Now end devices are connected to the channel
