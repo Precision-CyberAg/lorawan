@@ -67,6 +67,10 @@ public:
 
   virtual bool IsOnFrequency (double frequencyMHz);
 
+  void SetGatewayTransmissionPriority(bool tx_priority);
+
+  bool m_tx_priority = true;
+
   /**
    * Add a reception path, locked on a specific frequency.
    */

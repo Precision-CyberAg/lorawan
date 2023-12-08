@@ -75,6 +75,12 @@ SimpleGatewayLoraPhy::Send (Ptr<Packet> packet, LoraTxParameters txParams, doubl
 
       if (!currentPath->IsAvailable ()) // Reception path is occupied
         {
+            //Check if Tx priority. If not, let Rx be and cancel the Tx
+            if(!m_tx_priority){
+                NS_LOG_DEBUG("Gateway Tx priority is false, since it is already in reception, ignoring the Tx");
+                return;
+            }
+
           // Call the callback for reception interrupted by transmission
           // Fire the trace source
           if (m_device)

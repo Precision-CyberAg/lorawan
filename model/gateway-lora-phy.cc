@@ -143,6 +143,12 @@ GatewayLoraPhy::AddReceptionPath ()
 }
 
 void
+GatewayLoraPhy::SetGatewayTransmissionPriority(bool tx_priority)
+{
+  m_tx_priority = tx_priority;
+}
+
+void
 GatewayLoraPhy::ResetReceptionPaths (void)
 {
   NS_LOG_FUNCTION (this);

@@ -109,6 +109,8 @@ LoraPhyHelper::Create (Ptr<Node> node, Ptr<NetDevice> device) const
           phy->GetObject<SimpleGatewayLoraPhy> ()->AddReceptionPath ();
           receptionPaths++;
         }
+        //Set Gateway Tx priority flag
+        phy->GetObject<SimpleGatewayLoraPhy> ()->SetGatewayTransmissionPriority(m_txPriority);
     }
   else if (typeId == "ns3::SimpleEndDeviceLoraPhy")
     {

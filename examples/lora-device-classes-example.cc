@@ -42,6 +42,8 @@ double radius = 6400; // Note that due to model updates, 7500 m is no longer the
 double simulationTime = 600;
 int dataUpType = 0;
 char endDeviceType = 'B';
+int m_gateway_reception_paths = 8;
+bool m_gateway_tx_priority = true;
 
 // Channel model
 bool realisticChannelModel = true;
@@ -65,6 +67,8 @@ main(int argc, char* argv[])
    cmd.AddValue("dataUpType", "The type of traffic coming from end devices: {Unconfirmed=0, Confirmed=1, Mixed=2}", dataUpType);
    cmd.AddValue("realisticModel", "Whether the channel model needs to be realistic or not", realisticChannelModel);
    cmd.AddValue("endDeviceType", "Specify the class of the end devices", endDeviceType);
+   cmd.AddValue("gatewayReceptionPaths", "Number of gateway's parallel reception paths", m_gateway_reception_paths);
+   cmd.AddValue("gatewayTxPriority", "Gateway Tx priority over Rx", m_gateway_tx_priority);
    cmd.Parse(argc, argv);
 
    // Set up logging
@@ -174,7 +178,8 @@ main(int argc, char* argv[])
 
    helper.Install(phyHelper, macHelper, endDevices);
 
-   LorawanMacHeader::MType mType1, mType2;
+   LorawanMacHeader::MType mType1;
+   LorawanMacHeader::MType mType2;
    switch (dataUpType)
    {
    case 0:
@@ -241,7 +246,11 @@ main(int argc, char* argv[])
 
    // Create a netdevice for each gateway
    phyHelper.SetDeviceType(LoraPhyHelper::GW);
+   phyHelper.SetGatewayTransmissionPriority(m_gateway_tx_priority);
+   phyHelper.SetMaxReceptionPaths(m_gateway_reception_paths);
+
    macHelper.SetDeviceType(LorawanMacHelper::GW);
+
    helper.Install(phyHelper, macHelper, gateways);
 
 
