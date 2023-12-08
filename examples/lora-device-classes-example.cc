@@ -44,6 +44,7 @@ int dataUpType = 0;
 char endDeviceType = 'B';
 int m_gateway_reception_paths = 8;
 bool m_gateway_tx_priority = true;
+bool m_gw_beaconing_devices_a_c = true;
 
 // Channel model
 bool realisticChannelModel = true;
@@ -69,6 +70,7 @@ main(int argc, char* argv[])
    cmd.AddValue("endDeviceType", "Specify the class of the end devices", endDeviceType);
    cmd.AddValue("gatewayReceptionPaths", "Number of gateway's parallel reception paths", m_gateway_reception_paths);
    cmd.AddValue("gatewayTxPriority", "Gateway Tx priority over Rx", m_gateway_tx_priority);
+   cmd.AddValue("gatewayBeaconingForDeviceClasses_A_C", "Determines whether GW should be performing beaconing when the devices used in simulation belong to A/C classes", m_gw_beaconing_devices_a_c);
    cmd.Parse(argc, argv);
 
    // Set up logging
@@ -340,6 +342,10 @@ main(int argc, char* argv[])
        beaconingHelper.Install(gateways);
        beaconingHelper.SetDeviceType(Beaconing::DeviceType::ED);
        beaconingHelper.Install(endDevices);
+   }else if(m_gw_beaconing_devices_a_c){
+       BeaconingHelper beaconingHelper;
+       beaconingHelper.SetDeviceType(Beaconing::DeviceType::GW);
+       beaconingHelper.Install(gateways);
    }
 
    // Visualizer
