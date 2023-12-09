@@ -59,6 +59,10 @@ public:
 
 
   void SendBeacon();
+
+  bool m_gwDc = true;
+
+  void SetDutyCycle(bool dc);
 };
 
 } /* namespace ns3 */

@@ -79,6 +79,14 @@ public:
    */
   void SetAddressGenerator (Ptr<LoraDeviceAddressGenerator> addrGen);
 
+
+
+  /**
+   * Turn GW Duty Cycle On/Off */
+  bool m_gwDc = true;
+
+  void SetGatewayDutyCycle (bool dc);
+
   /**
    * Set the kind of MAC this helper will create.
    *

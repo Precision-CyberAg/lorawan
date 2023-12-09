@@ -40,6 +40,12 @@ LorawanMacHelper::Set (std::string name, const AttributeValue &v)
   m_mac.Set (name, v);
 }
 
+
+void
+LorawanMacHelper::SetGatewayDutyCycle (bool dc){
+    m_gwDc = dc;
+}
+
 void
 LorawanMacHelper::SetDeviceType (enum DeviceType dt)
 {
@@ -162,6 +168,7 @@ LorawanMacHelper::Create (Ptr<Node> node, Ptr<NetDevice> device) const
   else
     {
       Ptr<GatewayLorawanMac> gwMac = mac->GetObject<GatewayLorawanMac> ();
+      gwMac->SetDutyCycle(m_gwDc);
       switch (m_region)
         {
           case LorawanMacHelper::EU: {

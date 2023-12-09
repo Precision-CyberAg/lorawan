@@ -40,11 +40,12 @@ int nDevices = 2000;
 int nGateways = 1;
 double radius = 6400; // Note that due to model updates, 7500 m is no longer the maximum distance
 double simulationTime = 600;
-int dataUpType = 0;
+int dataUpType = 1;
 char endDeviceType = 'B';
 int m_gateway_reception_paths = 8;
 bool m_gateway_tx_priority = true;
-bool m_gw_beaconing_devices_a_c = true;
+bool m_gw_beacon_devices_a_c = true;
+bool m_gwDc = false;
 int m_maxReTransmissionAttempts = 8;
 
 // Channel model
@@ -71,8 +72,10 @@ main(int argc, char* argv[])
    cmd.AddValue("endDeviceType", "Specify the class of the end devices", endDeviceType);
    cmd.AddValue("gatewayReceptionPaths", "Number of gateway's parallel reception paths", m_gateway_reception_paths);
    cmd.AddValue("gatewayTxPriority", "Gateway Tx priority over Rx", m_gateway_tx_priority);
-   cmd.AddValue("gatewayBeaconingForDeviceClasses_A_C", "Determines whether GW should be performing beaconing when the devices used in simulation belong to A/C classes", m_gw_beaconing_devices_a_c);
+   cmd.AddValue("gatewayBeaconingForDeviceClasses_A_C", "Determines whether GW should be performing beaconing when the devices used in simulation belong to A/C classes",
+                m_gw_beacon_devices_a_c);
    cmd.AddValue("endDeviceMaxRetransmissions", "Number of retransmission attempts for confirmed traffic of end devices", m_maxReTransmissionAttempts);
+   cmd.AddValue("gwDc","Gateway Duty Cycle is on if the value is True", m_gwDc);
    cmd.Parse(argc, argv);
 
    // Set up logging
@@ -257,7 +260,7 @@ main(int argc, char* argv[])
    phyHelper.SetMaxReceptionPaths(m_gateway_reception_paths);
 
    macHelper.SetDeviceType(LorawanMacHelper::GW);
-
+   macHelper.SetGatewayDutyCycle(m_gwDc);
    helper.Install(phyHelper, macHelper, gateways);
 
 
@@ -347,7 +350,7 @@ main(int argc, char* argv[])
        beaconingHelper.Install(gateways);
        beaconingHelper.SetDeviceType(Beaconing::DeviceType::ED);
        beaconingHelper.Install(endDevices);
-   }else if(m_gw_beaconing_devices_a_c){
+   }else if(m_gw_beacon_devices_a_c){
        BeaconingHelper beaconingHelper;
        beaconingHelper.SetDeviceType(Beaconing::DeviceType::GW);
        beaconingHelper.Install(gateways);

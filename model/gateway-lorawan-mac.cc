@@ -55,6 +55,12 @@ GatewayLorawanMac::~GatewayLorawanMac ()
 }
 
 void
+GatewayLorawanMac::SetDutyCycle(bool dc)
+{
+    m_gwDc = dc;
+}
+
+void
 GatewayLorawanMac::Send (Ptr<Packet> packet)
 {
   NS_LOG_FUNCTION (this << packet);
@@ -70,13 +76,15 @@ GatewayLorawanMac::Send (Ptr<Packet> packet)
   NS_LOG_DEBUG ("Freq: " << frequency << " MHz");
   packet->AddPacketTag (tag);
 
-  // Make sure we can transmit this packet
-  if (m_channelHelper.GetWaitingTime(CreateObject<LogicalLoraChannel> (frequency)) > Time(0))
-    {
-      // We cannot send now!
-      NS_LOG_WARN ("Trying to send a packet but Duty Cycle won't allow it. Aborting.");
-      return;
-    }
+  if(m_gwDc){
+      // Make sure we can transmit this packet
+      if (m_channelHelper.GetWaitingTime(CreateObject<LogicalLoraChannel> (frequency)) > Time(0))
+      {
+          // We cannot send now!
+          NS_LOG_WARN ("Trying to send a packet but Duty Cycle won't allow it. Aborting.");
+          return;
+      }
+  }
 
   LoraTxParameters params;
   params.sf = GetSfFromDataRate (dataRate);
