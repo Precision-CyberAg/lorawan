@@ -381,24 +381,30 @@ ClassCEndDeviceLorawanMac::OpenSecondReceiveWindow (void)
   // Set Phy in Standby mode
   m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
 
-  // Switch to appropriate channel and data rate
-  NS_LOG_INFO ("Using parameters: " << m_secondReceiveWindowFrequency << "Hz, DR"
-                                    << unsigned(m_secondReceiveWindowDataRate));
+  if(m_use_rx1_params_for_rx2_class_c){
+      // Switch the PHY to the channel so that it will listen here for downlink
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (tx_freq);
 
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
-    (m_secondReceiveWindowFrequency);
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
+      // Instruct the PHY on the right Spreading Factor to listen for during the window
+      // create a SetReplyDataRate function?
+      uint8_t replyDataRate = GetFirstReceiveWindowDataRate ();
+      NS_LOG_DEBUG ("m_dataRate: " << unsigned (m_dataRate) <<
+                   ", m_rx1DrOffset: " << unsigned (m_rx1DrOffset) <<
+                   ", replyDataRate: " << unsigned (replyDataRate) << ".");
+
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor
+          (GetSfFromDataRate (replyDataRate));
+  }else{
+      // Switch to appropriate channel and data rate
+      NS_LOG_INFO ("Using parameters: " << m_secondReceiveWindowFrequency << "Hz, DR"
+                                       << unsigned(m_secondReceiveWindowDataRate));
+
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
+          (m_secondReceiveWindowFrequency);
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
                                                                (m_secondReceiveWindowDataRate));
 
-  //Calculate the duration of a single symbol for the second receive window DR
-  // double tSym = pow (2, GetSfFromDataRate (GetSecondReceiveWindowDataRate ())) / GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate ());
-
-  // Schedule return to sleep after "at least the time required by the end
-  // device's radio transceiver to effectively detect a downlink preamble"
-  // (LoraWAN specification)
-  // Class C devices do not need schedule a closeReceiveWindow event
-  // m_closeSecondWindow = Simulator::Schedule (Seconds (m_receiveWindowDurationInSymbols*tSym),
-  //                                            &ClassCEndDeviceLorawanMac::CloseSecondReceiveWindow, this);
+  }
 
 }
 

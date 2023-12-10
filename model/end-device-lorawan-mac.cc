@@ -153,6 +153,12 @@ EndDeviceLorawanMac::~EndDeviceLorawanMac ()
   NS_LOG_FUNCTION_NOARGS ();
 }
 
+void
+EndDeviceLorawanMac::SetRx1ParamsForRx2ClassC(bool value)
+{
+    m_use_rx1_params_for_rx2_class_c = value;
+}
+
 ////////////////////////
 //  Sending methods   //
 ////////////////////////

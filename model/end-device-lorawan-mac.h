@@ -335,6 +335,10 @@ public:
    */
   void AddMacCommand (Ptr<MacCommand> macCommand);
 
+  bool m_use_rx1_params_for_rx2_class_c;
+
+  void SetRx1ParamsForRx2ClassC(bool value);
+
 protected:
   /**
    * Structure representing the parameters that will be used in the
