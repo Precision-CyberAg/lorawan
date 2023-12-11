@@ -36,7 +36,7 @@ using namespace lorawan;
 NS_LOG_COMPONENT_DEFINE("LoraDeviceClassesExample");
 
 // Network settings
-int nDevices = 2000;
+int nDevices = 200;
 int nGateways = 1;
 double radius = 6400; // Note that due to model updates, 7500 m is no longer the maximum distance
 double simulationTime = 600;
@@ -405,6 +405,34 @@ main(int argc, char* argv[])
              << "\"SimTime\":"
              << "\"" + std::to_string(appStopTime.GetSeconds()) + "\""
              << ","
+             << "\"SimParams\":{"
+             <<"\"endDeviceCount\":"
+             << "\"" << nDevices << "\","
+             <<"\"gatewayCount\":"
+             << "\"" << nGateways << "\","
+             <<"\"simRadius\":"
+             << "\"" << radius << "\","
+             <<"\"simTime\":"
+             << "\"" << simulationTime << "\","
+             <<"\"dataUpType\":"
+             << "\"" << dataUpType << "\","
+             <<"\"endDeviceType\":"
+             << "\"" << endDeviceType << "\","
+             <<"\"gatewayReceptionPathsCount\":"
+             << "\"" << m_gateway_reception_paths << "\","
+             <<"\"gatewayTxPriority\":"
+             << "\"" << m_gateway_tx_priority << "\","
+             <<"\"gatewayBeaconForClassesAC\":"
+             << "\"" << m_gw_beacon_devices_a_c << "\","
+             <<"\"gatewayDutyCycle\":"
+             << "\"" << m_gwDc << "\","
+             <<"\"Rx1ParamsForRx2ClassC\":"
+             << "\"" << m_rx2_use_rx1_params_c << "\","
+             <<"\"EndDeviceTxIntervalPeriod\":"
+             << "\"" << appPeriodSeconds << "\","
+             <<"\"MaxRetransmissionAttemptsConfirmedTraffic\":"
+             << "\"" << m_maxReTransmissionAttempts << "\""
+             <<"},"
              << "\"Metrics\":{"
              <<"\"S\":"
              << "\"" << tracker.packetSCount << "\","
