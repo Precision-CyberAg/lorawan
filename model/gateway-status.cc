@@ -109,16 +109,19 @@ GatewayStatus::IsAvailableForTransmission (double frequency)
       return false;
     }
 
-  // Check that the gateway is not constrained by the duty cycle
-  Time waitingTime = m_gatewayMac->GetWaitingTime (frequency);
-  if (waitingTime > Seconds (0))
-    {
-      NS_LOG_INFO ("Gateway cannot be used because of duty cycle");
-      NS_LOG_INFO ("Waiting time at current GW: " << waitingTime.GetSeconds ()
-                                                  << " seconds");
+    if(m_gatewayMac->m_gwDc){
+        // Check that the gateway is not constrained by the duty cycle
+        Time waitingTime = m_gatewayMac->GetWaitingTime (frequency);
+        if (waitingTime > Seconds (0))
+        {
+            NS_LOG_INFO ("Gateway cannot be used because of duty cycle");
+            NS_LOG_INFO ("Waiting time at current GW: " << waitingTime.GetSeconds ()
+                                                       << " seconds");
 
-      return false;
+            return false;
+        }
     }
+
 
   return true;
 }

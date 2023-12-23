@@ -146,14 +146,16 @@ GatewayLorawanMac::SendBeacon(){
   NS_LOG_DEBUG(packet);
   packet->Print(std::cout);
 
-  // Make sure we can transmit this packet
-  if (m_channelHelper.GetWaitingTime(CreateObject<LogicalLoraChannel> (frequency)) > Time(0))
+  if(m_gwDc)
   {
-      // We cannot send now!
-      NS_LOG_WARN ("Trying to send a packet but Duty Cycle won't allow it. Aborting.");
-      return;
+      // Make sure we can transmit this packet
+      if (m_channelHelper.GetWaitingTime(CreateObject<LogicalLoraChannel>(frequency)) > Time(0))
+      {
+          // We cannot send now!
+          NS_LOG_WARN("Trying to send a packet but Duty Cycle won't allow it. Aborting.");
+          return;
+      }
   }
-
   LoraTxParameters params;
   params.sf = GetSfFromDataRate (dataRate);
   params.headerDisabled = true;
