@@ -24,6 +24,7 @@
 #include "ns3/lora-net-device.h"
 #include "ns3/log.h"
 #include "ns3/random-variable-stream.h"
+#include "lorawan-mac-helper.h"
 
 namespace ns3 {
 namespace lorawan {
@@ -334,7 +335,6 @@ LorawanMacHelper::ConfigureForAlohaRegion (Ptr<GatewayLorawanMac> gwMac) const
       gwPhy->ResetReceptionPaths ();
 
       int receptionPaths = 0;
-      int maxReceptionPaths = 1;
       while (receptionPaths < maxReceptionPaths)
         {
           gwPhy->GetObject<GatewayLoraPhy> ()->AddReceptionPath ();
@@ -527,7 +527,6 @@ LorawanMacHelper::ConfigureForEuRegion (Ptr<GatewayLorawanMac> gwMac) const
         }
 
       int receptionPaths = 0;
-      int maxReceptionPaths = 8;
       while (receptionPaths < maxReceptionPaths)
         {
           gwPhy->GetObject<GatewayLoraPhy> ()->AddReceptionPath ();
@@ -726,7 +725,6 @@ LorawanMacHelper::ConfigureForSingleChannelRegion (Ptr<GatewayLorawanMac> gwMac)
         }
 
       int receptionPaths = 0;
-      int maxReceptionPaths = 8;
       while (receptionPaths < maxReceptionPaths)
         {
           gwPhy->GetObject<GatewayLoraPhy> ()->AddReceptionPath ();
@@ -984,7 +982,15 @@ LorawanMacHelper::SetSpreadingFactorsGivenDistribution (NodeContainer endDevices
 
   return sfQuantity;
 
-} //  end function
+}
+
+void
+LorawanMacHelper::SetGatewayMaxReceptionPaths(int maxPaths)
+{
+    maxReceptionPaths = maxPaths;
+}
+
+//  end function
 
 } // namespace lorawan
 } // namespace ns3

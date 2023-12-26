@@ -80,6 +80,9 @@ public:
   void SetAddressGenerator (Ptr<LoraDeviceAddressGenerator> addrGen);
 
 
+  int maxReceptionPaths = 8;
+
+  void SetGatewayMaxReceptionPaths(int maxPaths);
 
   /**
    * Turn GW Duty Cycle On/Off */
