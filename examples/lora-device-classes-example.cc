@@ -265,6 +265,7 @@ main(int argc, char* argv[])
    macHelper.SetDeviceType(LorawanMacHelper::GW);
    macHelper.SetGatewayDutyCycle(m_gwDc);
    macHelper.SetGatewayMaxReceptionPaths(m_gateway_reception_paths);
+   helper.Install(phyHelper, macHelper, gateways);
 
 
    /**********************************************
