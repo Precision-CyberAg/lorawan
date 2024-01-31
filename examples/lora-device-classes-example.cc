@@ -46,7 +46,7 @@ int m_gateway_reception_paths = 8;
 bool m_gateway_tx_priority = true;
 bool m_gw_beacon_devices_a_c = false;
 bool m_gwDc = true;
-bool m_rx2_use_rx1_params_c = false;
+bool m_rx2_rx1_params_swap = false;
 int m_maxReTransmissionAttempts = 8;
 
 // Channel model
@@ -77,7 +77,8 @@ main(int argc, char* argv[])
                 m_gw_beacon_devices_a_c);
    cmd.AddValue("endDeviceMaxRetransmissions", "Number of retransmission attempts for confirmed traffic of end devices", m_maxReTransmissionAttempts);
    cmd.AddValue("gwDc","Gateway Duty Cycle is on if the value is True", m_gwDc);
-   cmd.AddValue("useRx1ParamsForRx2ClassC", "Class C devices use Rx1 params for Rx2 receive window too", m_rx2_use_rx1_params_c);
+   cmd.AddValue("useRx1ParamsForRx2ClassC", "Class C devices use Rx1 params for Rx2 receive window too",
+                m_rx2_rx1_params_swap);
    cmd.Parse(argc, argv);
 
    // Set up logging
@@ -230,7 +231,7 @@ main(int argc, char* argv[])
 
        //Set Retransmissions Attempt value for end devices
        edLoraMac->SetMaxNumberOfTransmissions(m_maxReTransmissionAttempts);
-       edLoraMac->SetRx1ParamsForRx2ClassC(m_rx2_use_rx1_params_c);
+       edLoraMac->SetRx1ParamsRx2Swap(m_rx2_rx1_params_swap);
    }
 
    // Now end devices are connected to the channel
@@ -427,8 +428,8 @@ main(int argc, char* argv[])
              << "\"" << m_gw_beacon_devices_a_c << "\","
              <<"\"gatewayDutyCycle\":"
              << "\"" << m_gwDc << "\","
-             <<"\"Rx1ParamsForRx2ClassC\":"
-             << "\"" << m_rx2_use_rx1_params_c << "\","
+             <<"\"Rx1ParamsRx2Swap\":"
+             << "\"" << m_rx2_rx1_params_swap << "\","
              <<"\"EndDeviceTxIntervalPeriod\":"
              << "\"" << appPeriodSeconds << "\","
              <<"\"MaxRetransmissionAttemptsConfirmedTraffic\":"

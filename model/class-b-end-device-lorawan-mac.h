@@ -169,6 +169,7 @@ public:
 
   uint8_t GetBeaconReceiveWindowDataRate();
 
+
   /////////////////////////
   // MAC command methods //
   /////////////////////////
@@ -250,6 +251,7 @@ private:
    */
   uint8_t m_rx1DrOffset;
 
+    double tx_freq = 0;
 
 }; /* ClassBEndDeviceLorawanMac */
 } /* namespace lorawan */

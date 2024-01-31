@@ -215,6 +215,9 @@ private:
    */
   uint8_t m_rx1DrOffset;
 
+
+  double tx_freq = 0;
+
 }; /* ClassAEndDeviceLorawanMac */
 } /* namespace lorawan */
 } /* namespace ns3 */

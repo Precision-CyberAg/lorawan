@@ -259,8 +259,16 @@ EndDeviceStatus::InsertReceivedPacket (Ptr<Packet const> receivedPacket, const A
   // Update current parameters
   LoraTag tag;
   myPacket->RemovePacketTag (tag);
+
+  if(m_mac->m_rx1_params_rx2_swap){
+      SetFirstReceiveWindowFrequency(869.525);
+      SetSecondReceiveWindowFrequency(tag.GetFrequency());
+  }else{
+      SetFirstReceiveWindowFrequency(tag.GetFrequency());
+      SetSecondReceiveWindowFrequency(869.525);
+  }
+  //Only Used in ADR, no point in setting for RX1RX2paramSwap
   SetFirstReceiveWindowSpreadingFactor (tag.GetSpreadingFactor ());
-  SetFirstReceiveWindowFrequency (tag.GetFrequency ());
 
   // Update Information on the received packet
   ReceivedPacketInfo info;

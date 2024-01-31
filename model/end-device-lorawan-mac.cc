@@ -154,9 +154,9 @@ EndDeviceLorawanMac::~EndDeviceLorawanMac ()
 }
 
 void
-EndDeviceLorawanMac::SetRx1ParamsForRx2ClassC(bool value)
+EndDeviceLorawanMac::SetRx1ParamsRx2Swap(bool value)
 {
-    m_use_rx1_params_for_rx2_class_c = value;
+  m_rx1_params_rx2_swap = value;
 }
 
 ////////////////////////

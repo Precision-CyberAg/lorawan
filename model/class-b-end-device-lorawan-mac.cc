@@ -72,6 +72,7 @@ ClassBEndDeviceLorawanMac::~ClassBEndDeviceLorawanMac ()
 // Sending methods //
 /////////////////////
 
+
 void
 ClassBEndDeviceLorawanMac::SendToPhy (Ptr<Packet> packetToSend)
 {
@@ -123,6 +124,7 @@ ClassBEndDeviceLorawanMac::SendToPhy (Ptr<Packet> packetToSend)
 
   // Switch the PHY to the channel so that it will listen here for downlink
   m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (txChannel->GetFrequency ());
+  tx_freq = txChannel->GetFrequency();
 
   // Instruct the PHY on the right Spreading Factor to listen for during the window
   // create a SetReplyDataRate function?
@@ -455,11 +457,45 @@ ClassBEndDeviceLorawanMac::OpenFirstReceiveWindow (void)
   // Set Phy in Standby mode
   m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
 
-  uint8_t sfFromDataRate = GetSfFromDataRate(GetFirstReceiveWindowDataRate());
-  NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+  uint8_t sfFromDataRate;
 
-  double bandwidthFromDataRate = GetBandwidthFromDataRate ( GetFirstReceiveWindowDataRate ());
-  NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+  double bandwidthFromDataRate;
+
+  if(m_rx1_params_rx2_swap){
+        // Switch to appropriate channel and data rate
+        NS_LOG_INFO ("Using parameters: " << m_secondReceiveWindowFrequency << "Hz, DR"
+                                         << unsigned(m_secondReceiveWindowDataRate));
+
+        m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
+            (m_secondReceiveWindowFrequency);
+        m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
+                                                                 (m_secondReceiveWindowDataRate));
+
+        sfFromDataRate= GetSfFromDataRate(GetSecondReceiveWindowDataRate());
+        NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+        bandwidthFromDataRate= GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate());
+        NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+
+  }else{
+        // Switch the PHY to the channel so that it will listen here for downlink
+        m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (tx_freq);
+
+        // Instruct the PHY on the right Spreading Factor to listen for during the window
+        // create a SetReplyDataRate function?
+        uint8_t replyDataRate = GetFirstReceiveWindowDataRate ();
+        NS_LOG_DEBUG ("m_dataRate: " << unsigned (m_dataRate) <<
+                     ", m_rx1DrOffset: " << unsigned (m_rx1DrOffset) <<
+                     ", replyDataRate: " << unsigned (replyDataRate) << ".");
+
+        m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor
+            (GetSfFromDataRate (replyDataRate));
+
+        sfFromDataRate= GetSfFromDataRate(GetFirstReceiveWindowDataRate());
+        NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+        bandwidthFromDataRate= GetBandwidthFromDataRate ( GetFirstReceiveWindowDataRate ());
+        NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+
+  }
 
   //Calculate the duration of a single symbol for the first receive window DR
   double tSym = pow (2, sfFromDataRate) / bandwidthFromDataRate;
@@ -523,21 +559,44 @@ ClassBEndDeviceLorawanMac::OpenSecondReceiveWindow (void)
   // Set Phy in Standby mode
   m_phy->GetObject<EndDeviceLoraPhy> ()->SwitchToStandby ();
 
-  // Switch to appropriate channel and data rate
-  NS_LOG_INFO ("Using parameters: " << m_secondReceiveWindowFrequency << "Hz, DR"
-                                    << unsigned(m_secondReceiveWindowDataRate));
 
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
-    (m_secondReceiveWindowFrequency);
-  m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
+  uint8_t sfFromDataRate;
+
+  double bandwidthFromDataRate;
+
+  if(m_rx1_params_rx2_swap){
+      // Switch the PHY to the channel so that it will listen here for downlink
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency (tx_freq);
+
+      // Instruct the PHY on the right Spreading Factor to listen for during the window
+      // create a SetReplyDataRate function?
+      uint8_t replyDataRate = GetFirstReceiveWindowDataRate ();
+      NS_LOG_DEBUG ("m_dataRate: " << unsigned (m_dataRate) <<
+                   ", m_rx1DrOffset: " << unsigned (m_rx1DrOffset) <<
+                   ", replyDataRate: " << unsigned (replyDataRate) << ".");
+
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor
+          (GetSfFromDataRate (replyDataRate));
+
+      sfFromDataRate= GetSfFromDataRate(GetFirstReceiveWindowDataRate());
+      NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+      bandwidthFromDataRate= GetBandwidthFromDataRate ( GetFirstReceiveWindowDataRate ());
+      NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
+  }else{
+      // Switch to appropriate channel and data rate
+      NS_LOG_INFO ("Using parameters: " << m_secondReceiveWindowFrequency << "Hz, DR"
+                                       << unsigned(m_secondReceiveWindowDataRate));
+
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetFrequency
+          (m_secondReceiveWindowFrequency);
+      m_phy->GetObject<EndDeviceLoraPhy> ()->SetSpreadingFactor (GetSfFromDataRate
                                                                (m_secondReceiveWindowDataRate));
+      sfFromDataRate= GetSfFromDataRate(GetSecondReceiveWindowDataRate());
+      NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
+      bandwidthFromDataRate= GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate());
+      NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
 
-  uint8_t sfFromDataRate = GetSfFromDataRate (GetSecondReceiveWindowDataRate ());
-  NS_LOG_DEBUG("SF from data rate: "<< unsigned (sfFromDataRate));
-
-  double bandwidthFromDataRate = GetBandwidthFromDataRate ( GetSecondReceiveWindowDataRate ());
-  NS_LOG_DEBUG("Bandwidth from data rate: "<<bandwidthFromDataRate);
-
+  }
   //Calculate the duration of a single symbol for the second receive window DR
   double tSym = pow (2, sfFromDataRate) / bandwidthFromDataRate;
   NS_LOG_DEBUG("Duration for a single symbol in second receive window: "<<tSym);
